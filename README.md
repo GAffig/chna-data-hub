@@ -1,36 +1,39 @@
 ﻿# CHNA Data Hub
 
-GitHub-ready monorepo for CHNA source management, ingestion tracking, and team data access.
+Manager-friendly CHNA data retrieval app for Ballad Population Health teams.
 
-## Structure
+## What This Version Delivers
 
-- `backend/`: FastAPI + PostgreSQL API
-- `frontend/`: lightweight web UI
-- `data_contracts/`: source and metric schema contracts
-- `.github/workflows/`: CI pipelines
-- `infra/`: deployment placeholders
+- Multi-page web app for non-technical users:
+  - `Explorer` (state/county selection -> indicators -> CSV download)
+  - `Smart Search` (plain-language style query with source-cited results)
+  - `Settings` (health check, source seed, connector refresh, run history)
+- Focused geography defaults for Northeast Tennessee and Southwest Virginia
+- Persistent source attribution bar in UI
+- Source registry seeded from your BRMC CHNA references
+- Connector-backed ingestion from Census ACS and CDC PLACES
 
-## Quick Start (Docker)
+## Tech Stack
 
-```bash
-docker compose up --build
-```
+- `backend/`: FastAPI + SQLAlchemy
+- `frontend/`: static multi-page UI (`index.html`, `search.html`, `settings.html`)
+- `.github/workflows/ci.yml`: lint + tests on push/PR
 
-Services:
-- API: http://localhost:8000/docs
-- Frontend: http://localhost:8080
-- Postgres: localhost:5432
+## Design Direction
 
-## Local Dev (without Docker)
+The UI uses Ballad website visual cues:
+- Primary palette anchored on Ballad blues (`#006bb6`, `#004ea0`, `#0096ff`)
+- Clean white panels and clear typography hierarchy
+- Task-first workflow (step-by-step retrieval and export)
+
+## Quick Start
 
 ### Backend
 
 ```bash
 cd backend
-python -m venv .venv
-. .venv/Scripts/activate
-pip install -r requirements.txt
-uvicorn app.main:app --reload
+python -m pip install -r requirements.txt
+python -m uvicorn app.main:app --host 0.0.0.0 --port 8000
 ```
 
 ### Frontend
@@ -42,73 +45,55 @@ python -m http.server 8080
 
 Open `http://localhost:8080`.
 
-## Current Endpoints
+## Main API Endpoints
 
 - `GET /health`
 - `GET /sources`
 - `POST /sources`
-- `POST /sources/seed` (loads CHNA references from your BRMC reference list)
+- `POST /sources/seed`
 - `GET /runs`
 - `POST /runs`
 - `POST /connectors/census-acs/pull`
 - `POST /connectors/cdc-places/pull`
+- `GET /geography/options`
+- `GET /search`
 - `GET /metrics`
+- `GET /metrics/facets`
+- `GET /metrics/export/csv`
 
-`GET /metrics` supports filters:
+### `/metrics` filters
+
 - `year`
 - `source_name`
 - `measure_code`
+- `state_fips`
+- `county_geo_id`
 - `geo_prefix`
-- `limit` (1 to 5000, default 500)
+- `limit` (1 to 5000)
 
-## MVP Workflow
+## CHNA Topic Guidance Included
 
-1. Seed approved reference sources:
-```bash
-curl -X POST http://localhost:8000/sources/seed
-```
+The interface includes quick topic presets aligned to your CHNA priorities and appendix direction, including:
+- Chronic disease (diabetes, heart disease, cancer)
+- Behavioral/mental health and deaths of despair
+- Overweight/obesity
+- Access-related indicators
 
-2. Pull Census ACS county population (TN by default):
-```bash
-curl -X POST http://localhost:8000/connectors/census-acs/pull \
-  -H "Content-Type: application/json" \
-  -d '{"year": 2024, "state_fips": "47", "replace_existing": true}'
-```
+It is intentionally not limited to only those topics.
 
-3. Pull CDC PLACES county measures:
-```bash
-curl -X POST http://localhost:8000/connectors/cdc-places/pull \
-  -H "Content-Type: application/json" \
-  -d '{"year": 2025, "state_abbr": "TN", "replace_existing": true}'
-```
+## Share With A Colleague
 
-4. Query standardized metric records:
-```bash
-curl "http://localhost:8000/metrics?year=2025&source_name=CDC%20PLACES"
-```
+1. Start backend on your machine (`0.0.0.0:8000`).
+2. Start frontend on your machine (`:8080`).
+3. Share your host IP (example `http://192.168.1.20:8080`).
+4. Teammate opens the URL on the same network.
 
-Optionally set `CENSUS_API_KEY` in your environment before pulling Census data.
-Set `APP_CORS_ORIGINS` if you want to restrict browser access (default is `*` for easy testing).
+If needed, set `APP_CORS_ORIGINS` in backend env to restrict allowed browser origins (default is `*` for easy pilot testing).
 
-## Share With A Colleague (Quick Test)
+## Quality Checks
 
-1. Clone the repo.
-2. Start backend:
 ```bash
 cd backend
-python -m pip install -r requirements.txt
-python -m uvicorn app.main:app --host 0.0.0.0 --port 8000
+python -m ruff check .
+python -m pytest -q tests/test_health.py tests/test_seed_and_metrics.py tests/test_geography_and_search.py
 ```
-3. Start frontend in a second terminal:
-```bash
-cd frontend
-python -m http.server 8080
-```
-4. Open `http://localhost:8080` and set API Base URL to `http://<host-ip>:8000` if testing from another device on the same network.
-
-## Why this setup avoids dependency drift
-
-- Pinned Python dependencies in `backend/requirements.txt`
-- Containerized runtime in `docker-compose.yml`
-- CI checks in GitHub Actions
-- Explicit schema contracts in `data_contracts/`

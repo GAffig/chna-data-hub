@@ -1,0 +1,237 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CHNA Data Hub - Settings</title>
+  <link rel="stylesheet" href="assets/chna.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="app-header">
+      <div class="brand-wrap">
+        <h1 class="brand-title">CHNA Data Hub</h1>
+        <p class="brand-subtitle">Operational settings and data refresh controls.</p>
+      </div>
+      <nav class="nav-links" aria-label="Main navigation">
+        <a href="index.html">Explorer</a>
+        <a href="search.html">Smart Search</a>
+        <a href="settings.html" class="active">Settings</a>
+      </nav>
+    </header>
+
+    <section class="hero">
+      <h2>System setup for daily team use</h2>
+      <p>
+        Set the API endpoint, verify health, refresh sources and data connectors, then review run history.
+        Keep this page for admins; most users can stay in Explorer or Smart Search.
+      </p>
+    </section>
+
+    <main class="grid">
+      <section class="card span-6">
+        <h3>Connection</h3>
+        <div class="row">
+          <label style="flex: 1 1 320px;">API Base URL
+            <input id="apiInput" placeholder="http://localhost:8000" />
+          </label>
+          <button id="saveBtn" class="secondary">Save</button>
+          <button id="healthBtn">Check Health</button>
+        </div>
+        <div id="connectionStatus" class="status"></div>
+      </section>
+
+      <section class="card span-6">
+        <h3>Source Registry</h3>
+        <p class="helper">Initialize or refresh CHNA source references from your BRMC reference set.</p>
+        <div class="row">
+          <button id="seedBtn">Seed Sources</button>
+          <button id="reloadSourcesBtn" class="secondary">Reload Source Count</button>
+        </div>
+        <div id="sourceStatus" class="status"></div>
+      </section>
+
+      <section class="card span-12">
+        <h3>Connector Operations</h3>
+        <div class="row" style="margin-bottom: 8px;">
+          <label>Census Year
+            <input id="censusYear" type="number" value="2024" />
+          </label>
+          <label>Census State FIPS
+            <input id="censusState" value="47" maxlength="2" />
+          </label>
+          <button id="runCensusBtn">Run Census ACS Pull</button>
+        </div>
+        <div class="row">
+          <label>PLACES Year
+            <input id="placesYear" type="number" value="2025" />
+          </label>
+          <label>PLACES State Abbr
+            <input id="placesState" value="TN" maxlength="2" />
+          </label>
+          <button id="runPlacesBtn" class="warn">Run CDC PLACES Pull</button>
+        </div>
+        <div id="connectorStatus" class="status"></div>
+      </section>
+
+      <section class="card span-12">
+        <h3>Recent Ingestion Runs</h3>
+        <div class="row" style="margin-bottom: 8px;">
+          <button id="reloadRunsBtn" class="secondary">Refresh Run History</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Source</th>
+                <th>Status</th>
+                <th>Rows</th>
+                <th>Notes</th>
+                <th>Pulled At</th>
+              </tr>
+            </thead>
+            <tbody id="runsBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <footer class="source-bar" aria-label="Source attribution">
+    <div id="sourceBar" class="source-bar-inner"></div>
+  </footer>
+
+  <script src="assets/chna.js"></script>
+  <script>
+    const els = {
+      apiInput: document.getElementById('apiInput'),
+      saveBtn: document.getElementById('saveBtn'),
+      healthBtn: document.getElementById('healthBtn'),
+      seedBtn: document.getElementById('seedBtn'),
+      reloadSourcesBtn: document.getElementById('reloadSourcesBtn'),
+      runCensusBtn: document.getElementById('runCensusBtn'),
+      runPlacesBtn: document.getElementById('runPlacesBtn'),
+      reloadRunsBtn: document.getElementById('reloadRunsBtn'),
+      censusYear: document.getElementById('censusYear'),
+      censusState: document.getElementById('censusState'),
+      placesYear: document.getElementById('placesYear'),
+      placesState: document.getElementById('placesState'),
+      connectionStatus: document.getElementById('connectionStatus'),
+      sourceStatus: document.getElementById('sourceStatus'),
+      connectorStatus: document.getElementById('connectorStatus'),
+      runsBody: document.getElementById('runsBody'),
+      sourceBar: document.getElementById('sourceBar'),
+    };
+
+    async function checkHealth() {
+      try {
+        const payload = await CHNA.api('/health');
+        CHNA.setStatus(els.connectionStatus, `Connected: ${JSON.stringify(payload)}`, 'good');
+      } catch (err) {
+        CHNA.setStatus(els.connectionStatus, `Health check failed: ${err.message}`, 'bad');
+      }
+    }
+
+    async function reloadRuns() {
+      try {
+        const runs = await CHNA.api('/runs');
+        const html = runs
+          .map(
+            (run) => `<tr>
+              <td>${CHNA.escapeHtml(run.source_name)}</td>
+              <td>${CHNA.escapeHtml(run.run_status)}</td>
+              <td>${CHNA.formatNumber(run.record_count)}</td>
+              <td>${CHNA.escapeHtml(run.notes || '')}</td>
+              <td>${new Date(run.pulled_at).toLocaleString()}</td>
+            </tr>`
+          )
+          .join('');
+        els.runsBody.innerHTML = html || '<tr><td colspan="5">No runs yet.</td></tr>';
+      } catch (err) {
+        CHNA.setStatus(els.connectorStatus, `Could not load runs: ${err.message}`, 'bad');
+      }
+    }
+
+    async function reloadSources() {
+      try {
+        const sources = await CHNA.api('/sources');
+        CHNA.setStatus(els.sourceStatus, `${sources.length} source records available.`, 'good');
+        CHNA.renderSourceBar(els.sourceBar, sources.slice(0, 20));
+      } catch (err) {
+        CHNA.setStatus(els.sourceStatus, `Could not load sources: ${err.message}`, 'bad');
+      }
+    }
+
+    async function seedSources() {
+      try {
+        const result = await CHNA.api('/sources/seed', { method: 'POST' });
+        CHNA.setStatus(els.sourceStatus, `Seed complete. Inserted=${result.inserted}, skipped=${result.skipped}.`, 'good');
+        await reloadSources();
+      } catch (err) {
+        CHNA.setStatus(els.sourceStatus, `Seed failed: ${err.message}`, 'bad');
+      }
+    }
+
+    async function runCensusPull() {
+      try {
+        const payload = {
+          year: Number(els.censusYear.value || 2024),
+          state_fips: (els.censusState.value || '47').trim(),
+          replace_existing: true,
+        };
+        const result = await CHNA.api('/connectors/census-acs/pull', {
+          method: 'POST',
+          body: JSON.stringify(payload),
+        });
+        CHNA.setStatus(els.connectorStatus, `Census pull complete. Run ${result.run_id}, rows ${result.records_loaded}.`, 'good');
+        await reloadRuns();
+      } catch (err) {
+        CHNA.setStatus(els.connectorStatus, `Census pull failed: ${err.message}`, 'bad');
+      }
+    }
+
+    async function runPlacesPull() {
+      try {
+        const payload = {
+          year: Number(els.placesYear.value || 2025),
+          state_abbr: (els.placesState.value || 'TN').trim().toUpperCase(),
+          replace_existing: true,
+        };
+        const result = await CHNA.api('/connectors/cdc-places/pull', {
+          method: 'POST',
+          body: JSON.stringify(payload),
+        });
+        CHNA.setStatus(els.connectorStatus, `PLACES pull complete. Run ${result.run_id}, rows ${result.records_loaded}.`, 'good');
+        await reloadRuns();
+      } catch (err) {
+        CHNA.setStatus(els.connectorStatus, `PLACES pull failed: ${err.message}`, 'bad');
+      }
+    }
+
+    function saveApiBase() {
+      try {
+        const value = CHNA.setApiBase(els.apiInput.value);
+        CHNA.setStatus(els.connectionStatus, `Saved API base: ${value}`, 'good');
+      } catch (err) {
+        CHNA.setStatus(els.connectionStatus, err.message, 'bad');
+      }
+    }
+
+    async function init() {
+      els.apiInput.value = CHNA.getApiBase();
+      CHNA.renderSourceBar(els.sourceBar, []);
+      await Promise.all([checkHealth(), reloadSources(), reloadRuns()]);
+
+      els.saveBtn.addEventListener('click', saveApiBase);
+      els.healthBtn.addEventListener('click', checkHealth);
+      els.seedBtn.addEventListener('click', seedSources);
+      els.reloadSourcesBtn.addEventListener('click', reloadSources);
+      els.runCensusBtn.addEventListener('click', runCensusPull);
+      els.runPlacesBtn.addEventListener('click', runPlacesPull);
+      els.reloadRunsBtn.addEventListener('click', reloadRuns);
+    }
+
+    init();
+  </script>
+</body>
+</html>

@@ -79,3 +79,61 @@ class CommunityMetricRead(BaseModel):
     pulled_at: datetime
 
     model_config = {"from_attributes": True}
+
+
+class GeographyState(BaseModel):
+    name: str
+    abbr: str
+    fips: str
+
+
+class GeographyCounty(BaseModel):
+    geo_id: str
+    name: str
+    state_abbr: str
+    state_fips: str
+    focus_region: bool
+    available: bool
+
+
+class GeographyOptionsResponse(BaseModel):
+    states: list[GeographyState]
+    counties: list[GeographyCounty]
+
+
+class SourceAttributionRead(BaseModel):
+    name: str
+    url: str
+    citation: str
+    category: str
+
+
+class SearchResultRead(BaseModel):
+    source_name: str
+    measure_code: str
+    measure_name: str
+    unit: str
+    year: int
+    geo_id: str
+    geo_name: str
+    value: float
+    score: float
+
+
+class SearchResponse(BaseModel):
+    query: str
+    total_results: int
+    items: list[SearchResultRead]
+    sources: list[SourceAttributionRead]
+
+
+class MetricsFacetMeasure(BaseModel):
+    measure_code: str
+    measure_name: str
+
+
+class MetricsFacetsResponse(BaseModel):
+    years: list[int]
+    sources: list[str]
+    measures: list[MetricsFacetMeasure]
+    counties: list[str]

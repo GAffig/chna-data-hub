@@ -1,467 +1,367 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CHNA Data Hub</title>
-  <style>
-    :root {
-      --ink: #0f172a;
-      --muted: #475569;
-      --paper: #f8fafc;
-      --panel: #ffffff;
-      --line: #dbe3ee;
-      --brand: #0f766e;
-      --brand-dark: #115e59;
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: "IBM Plex Sans", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-      color: var(--ink);
-      background:
-        radial-gradient(1200px 600px at 15% -10%, #dbeafe 10%, transparent 50%),
-        radial-gradient(1200px 600px at 100% 0%, #dcfce7 10%, transparent 50%),
-        var(--paper);
-    }
-    .shell {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 24px 16px 40px;
-    }
-    .topbar {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 16px;
-      align-items: center;
-      margin-bottom: 18px;
-    }
-    h1 {
-      margin: 0;
-      font-size: clamp(1.6rem, 2.8vw, 2.2rem);
-      letter-spacing: 0.2px;
-    }
-    .subtitle { margin: 4px 0 0; color: var(--muted); }
-    .badge {
-      background: #ecfeff;
-      border: 1px solid #a5f3fc;
-      color: #0f766e;
-      font-weight: 600;
-      border-radius: 999px;
-      padding: 8px 12px;
-      font-size: 12px;
-    }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(12, 1fr);
-      gap: 14px;
-    }
-    .card {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      padding: 14px;
-      box-shadow: 0 10px 24px rgba(2, 6, 23, 0.04);
-    }
-    .span-12 { grid-column: span 12; }
-    .span-6 { grid-column: span 6; }
-    h2 {
-      margin: 0 0 10px;
-      font-size: 1.02rem;
-    }
-    .row {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      align-items: end;
-    }
-    label {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      font-size: 12px;
-      color: var(--muted);
-      min-width: 120px;
-      flex: 1;
-    }
-    input, select, button {
-      border: 1px solid #cbd5e1;
-      border-radius: 10px;
-      padding: 9px 10px;
-      font: inherit;
-      background: #fff;
-      color: var(--ink);
-    }
-    button {
-      background: var(--brand);
-      border-color: var(--brand);
-      color: #fff;
-      cursor: pointer;
-      font-weight: 600;
-      min-width: 108px;
-    }
-    button:hover { background: var(--brand-dark); }
-    button.alt {
-      background: #fff;
-      color: var(--ink);
-      border-color: #cbd5e1;
-    }
-    .status {
-      margin-top: 8px;
-      font-size: 13px;
-      color: var(--muted);
-      min-height: 18px;
-    }
-    .status.good { color: #166534; }
-    .status.bad { color: #991b1b; }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 13px;
-    }
-    th, td {
-      border-bottom: 1px solid #e2e8f0;
-      text-align: left;
-      padding: 8px 6px;
-      vertical-align: top;
-    }
-    th { font-size: 12px; color: var(--muted); text-transform: uppercase; }
-    .table-wrap {
-      max-height: 340px;
-      overflow: auto;
-      border: 1px solid #e2e8f0;
-      border-radius: 10px;
-    }
-    .mini {
-      font-size: 12px;
-      color: var(--muted);
-      margin-top: 8px;
-    }
-    .kpis {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 10px;
-    }
-    .kpi {
-      border: 1px solid #dbe3ee;
-      border-radius: 10px;
-      padding: 10px;
-      background: #fcfdff;
-    }
-    .kpi .label { font-size: 11px; color: var(--muted); text-transform: uppercase; }
-    .kpi .value { font-size: 1.2rem; font-weight: 700; margin-top: 3px; }
-    @media (max-width: 980px) {
-      .span-6 { grid-column: span 12; }
-      .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    }
-  </style>
+  <title>CHNA Data Hub - Explorer</title>
+  <link rel="stylesheet" href="assets/chna.css" />
 </head>
 <body>
-  <div class="shell">
-    <div class="topbar">
-      <div>
-        <h1>CHNA Data Hub</h1>
-        <p class="subtitle">Ballad Population Health research workspace for source registry and data pulls.</p>
+  <div class="app-shell">
+    <header class="app-header">
+      <div class="brand-wrap">
+        <h1 class="brand-title">CHNA Data Hub</h1>
+        <p class="brand-subtitle">Ballad-style data explorer for fast county-level retrieval and export.</p>
       </div>
-      <div class="badge">MVP Analyst Console</div>
-    </div>
+      <nav class="nav-links" aria-label="Main navigation">
+        <a href="index.html" class="active">Explorer</a>
+        <a href="search.html">Smart Search</a>
+        <a href="settings.html">Settings</a>
+      </nav>
+    </header>
 
-    <div class="grid">
-      <section class="card span-12">
-        <h2>Connection</h2>
+    <section class="hero">
+      <h2>Step-by-step data retrieval for CHNA teams</h2>
+      <p>
+        Start with state and county, choose a year and metric, then download. Defaults are tuned for Northeast Tennessee and Southwest Virginia,
+        based on Ballad CHNA priorities like chronic disease, behavioral health and obesity.
+      </p>
+    </section>
+
+    <main class="grid">
+      <section class="card span-8">
+        <h3>1. Select Geography and Metric</h3>
         <div class="row">
-          <label>API Base URL
-            <input id="apiBase" value="http://localhost:8000" />
+          <label>State
+            <select id="stateSelect"></select>
           </label>
-          <button id="saveApiBtn" class="alt">Save</button>
-          <button id="healthBtn">Check Health</button>
+          <label>County
+            <select id="countySelect"></select>
+          </label>
+          <label>Year
+            <select id="yearSelect"></select>
+          </label>
+          <label>Source
+            <select id="sourceSelect"><option value="">All Sources</option></select>
+          </label>
+          <label>Measure
+            <select id="measureSelect"><option value="">All Measures</option></select>
+          </label>
+          <label style="flex:0 0 220px;">
+            <span>Focus Region Only</span>
+            <select id="focusToggle">
+              <option value="true">Yes (NE TN + SW VA)</option>
+              <option value="false">No (all available counties)</option>
+            </select>
+          </label>
         </div>
-        <div id="connectionStatus" class="status"></div>
+        <div class="topic-chips" style="margin-top:10px;">
+          <button class="secondary topic-btn" data-keyword="diabetes">Diabetes</button>
+          <button class="secondary topic-btn" data-keyword="heart disease">Heart Disease</button>
+          <button class="secondary topic-btn" data-keyword="cancer">Cancer</button>
+          <button class="secondary topic-btn" data-keyword="mental">Behavioral Health</button>
+          <button class="secondary topic-btn" data-keyword="obesity">Obesity</button>
+        </div>
+        <div class="row" style="margin-top:10px;">
+          <button id="loadBtn">Load Indicators</button>
+          <button id="downloadBtn" class="secondary">Download CSV</button>
+        </div>
+        <div id="explorerStatus" class="status"></div>
       </section>
 
-      <section class="card span-6">
-        <h2>Bootstrapping</h2>
-        <div class="row">
-          <button id="seedBtn">Seed CHNA Sources</button>
-          <button id="refreshSourcesBtn" class="alt">Refresh Sources</button>
+      <section class="card span-4">
+        <h3>2. Refresh Data (Optional)</h3>
+        <p class="helper">Use this before meetings to pull latest Census and CDC PLACES values.</p>
+        <div class="row" style="margin-top:8px;">
+          <button id="seedBtn" class="secondary">Seed Sources</button>
+          <button id="censusBtn">Run Census Pull</button>
+          <button id="placesBtn" class="warn">Run PLACES Pull</button>
         </div>
-        <div id="seedStatus" class="status"></div>
-      </section>
-
-      <section class="card span-6">
-        <h2>Ingestion Connectors</h2>
-        <div class="row" style="margin-bottom: 8px;">
-          <label>Census Year
-            <input id="censusYear" type="number" value="2024" />
-          </label>
-          <label>State FIPS
-            <input id="censusFips" value="47" maxlength="2" />
-          </label>
-          <button id="runCensusBtn">Run Census ACS</button>
-        </div>
-        <div class="row">
-          <label>PLACES Year
-            <input id="placesYear" type="number" value="2025" />
-          </label>
-          <label>State Abbr
-            <input id="placesState" value="TN" maxlength="2" />
-          </label>
-          <button id="runPlacesBtn">Run CDC PLACES</button>
-        </div>
-        <div id="connectorStatus" class="status"></div>
+        <div id="refreshStatus" class="status"></div>
       </section>
 
       <section class="card span-12">
         <div class="kpis">
+          <div class="kpi"><div class="label">Rows</div><div class="value" id="kpiRows">0</div></div>
+          <div class="kpi"><div class="label">Distinct Measures</div><div class="value" id="kpiMeasures">0</div></div>
           <div class="kpi"><div class="label">Sources</div><div class="value" id="kpiSources">0</div></div>
-          <div class="kpi"><div class="label">Runs</div><div class="value" id="kpiRuns">0</div></div>
-          <div class="kpi"><div class="label">Metrics Loaded</div><div class="value" id="kpiMetrics">0</div></div>
-          <div class="kpi"><div class="label">Last Pull</div><div class="value" id="kpiLastPull">-</div></div>
-        </div>
-      </section>
-
-      <section class="card span-6">
-        <h2>Sources</h2>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Name</th><th>Category</th><th>Geo</th></tr></thead>
-            <tbody id="sourcesBody"></tbody>
-          </table>
-        </div>
-      </section>
-
-      <section class="card span-6">
-        <h2>Ingestion Runs</h2>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Source</th><th>Status</th><th>Rows</th><th>Pulled</th></tr></thead>
-            <tbody id="runsBody"></tbody>
-          </table>
+          <div class="kpi"><div class="label">Average Value</div><div class="value" id="kpiAvg">-</div></div>
         </div>
       </section>
 
       <section class="card span-12">
-        <h2>Metrics Browser</h2>
-        <div class="row" style="margin-bottom: 8px;">
-          <label>Year
-            <input id="metricYear" type="number" placeholder="e.g. 2025" />
-          </label>
-          <label>Source
-            <select id="metricSource">
-              <option value="">All</option>
-              <option>US Census ACS</option>
-              <option>CDC PLACES</option>
-            </select>
-          </label>
-          <label>Measure Code
-            <input id="metricCode" placeholder="e.g. B01003_001E" />
-          </label>
-          <label>Geo Prefix
-            <input id="geoPrefix" placeholder="e.g. 47" />
-          </label>
-          <label>Limit
-            <input id="metricLimit" type="number" value="250" min="1" max="5000" />
-          </label>
-          <button id="loadMetricsBtn">Load Metrics</button>
-          <button id="exportCsvBtn" class="alt">Export CSV</button>
-        </div>
+        <h3>3. Review and Export</h3>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>Source</th><th>Measure</th><th>Year</th><th>Geo</th><th>Name</th><th>Value</th><th>Unit</th></tr></thead>
+            <thead>
+              <tr>
+                <th>Source</th>
+                <th>Measure</th>
+                <th>Year</th>
+                <th>County</th>
+                <th>Value</th>
+                <th>Unit</th>
+              </tr>
+            </thead>
             <tbody id="metricsBody"></tbody>
           </table>
         </div>
-        <div id="metricsStatus" class="mini">Use filters and click Load Metrics.</div>
       </section>
-    </div>
+    </main>
   </div>
 
+  <footer class="source-bar" aria-label="Source attribution">
+    <div id="sourceBar" class="source-bar-inner"></div>
+  </footer>
+
+  <script src="assets/chna.js"></script>
   <script>
     const els = {
-      apiBase: document.getElementById("apiBase"),
-      connectionStatus: document.getElementById("connectionStatus"),
-      seedStatus: document.getElementById("seedStatus"),
-      connectorStatus: document.getElementById("connectorStatus"),
-      metricsStatus: document.getElementById("metricsStatus"),
-      sourcesBody: document.getElementById("sourcesBody"),
-      runsBody: document.getElementById("runsBody"),
-      metricsBody: document.getElementById("metricsBody"),
-      kpiSources: document.getElementById("kpiSources"),
-      kpiRuns: document.getElementById("kpiRuns"),
-      kpiMetrics: document.getElementById("kpiMetrics"),
-      kpiLastPull: document.getElementById("kpiLastPull"),
-      metricYear: document.getElementById("metricYear"),
-      metricSource: document.getElementById("metricSource"),
-      metricCode: document.getElementById("metricCode"),
-      geoPrefix: document.getElementById("geoPrefix"),
-      metricLimit: document.getElementById("metricLimit"),
-      censusYear: document.getElementById("censusYear"),
-      censusFips: document.getElementById("censusFips"),
-      placesYear: document.getElementById("placesYear"),
-      placesState: document.getElementById("placesState")
+      state: document.getElementById('stateSelect'),
+      county: document.getElementById('countySelect'),
+      year: document.getElementById('yearSelect'),
+      source: document.getElementById('sourceSelect'),
+      measure: document.getElementById('measureSelect'),
+      focusToggle: document.getElementById('focusToggle'),
+      loadBtn: document.getElementById('loadBtn'),
+      downloadBtn: document.getElementById('downloadBtn'),
+      seedBtn: document.getElementById('seedBtn'),
+      censusBtn: document.getElementById('censusBtn'),
+      placesBtn: document.getElementById('placesBtn'),
+      explorerStatus: document.getElementById('explorerStatus'),
+      refreshStatus: document.getElementById('refreshStatus'),
+      metricsBody: document.getElementById('metricsBody'),
+      kpiRows: document.getElementById('kpiRows'),
+      kpiMeasures: document.getElementById('kpiMeasures'),
+      kpiSources: document.getElementById('kpiSources'),
+      kpiAvg: document.getElementById('kpiAvg'),
+      sourceBar: document.getElementById('sourceBar'),
+      topicButtons: Array.from(document.querySelectorAll('.topic-btn')),
     };
 
-    let metricsCache = [];
+    let sourceMap = new Map();
+    let geoOptions = { states: [], counties: [] };
+    let rowsCache = [];
 
-    function baseUrl() {
-      return (els.apiBase.value || "").trim().replace(/\/$/, "");
+    function selectedStateAbbr() {
+      const selected = geoOptions.states.find((s) => s.fips === els.state.value);
+      return selected ? selected.abbr : '';
     }
 
-    function setStatus(node, text, ok = true) {
-      node.textContent = text;
-      node.classList.remove("good", "bad");
-      node.classList.add(ok ? "good" : "bad");
+    function renderMetrics(rows) {
+      rowsCache = rows;
+      const html = rows
+        .map(
+          (row) => `<tr>
+              <td>${CHNA.escapeHtml(row.source_name)}</td>
+              <td>${CHNA.escapeHtml(row.measure_name)} (${CHNA.escapeHtml(row.measure_code)})</td>
+              <td>${row.year}</td>
+              <td>${CHNA.escapeHtml(row.geo_name)}</td>
+              <td>${CHNA.formatNumber(row.value)}</td>
+              <td>${CHNA.escapeHtml(row.unit)}</td>
+            </tr>`
+        )
+        .join('');
+
+      els.metricsBody.innerHTML = html || '<tr><td colspan="6">No rows found for this selection.</td></tr>';
+
+      const measureCount = new Set(rows.map((r) => r.measure_code)).size;
+      const sourceCount = new Set(rows.map((r) => r.source_name)).size;
+      const avg = rows.length
+        ? rows.reduce((sum, row) => sum + Number(row.value || 0), 0) / rows.length
+        : null;
+
+      els.kpiRows.textContent = String(rows.length);
+      els.kpiMeasures.textContent = String(measureCount);
+      els.kpiSources.textContent = String(sourceCount);
+      els.kpiAvg.textContent = avg === null ? '-' : CHNA.formatNumber(avg);
+
+      const attributions = CHNA.mapSourceAttributionFromRows(rows, sourceMap);
+      CHNA.renderSourceBar(els.sourceBar, attributions);
     }
 
-    async function api(path, options = {}) {
-      const res = await fetch(baseUrl() + path, {
-        headers: { "Content-Type": "application/json" },
-        ...options
-      });
-      const text = await res.text();
-      let body;
-      try { body = text ? JSON.parse(text) : null; } catch { body = text; }
-      if (!res.ok) {
-        const detail = body && body.detail ? body.detail : body || "HTTP " + res.status;
-        throw new Error(typeof detail === "string" ? detail : JSON.stringify(detail));
+    function fillMeasureSelect(measures) {
+      els.measure.innerHTML = '<option value="">All Measures</option>';
+      for (const measure of measures) {
+        const opt = document.createElement('option');
+        opt.value = measure.measure_code;
+        opt.textContent = `${measure.measure_name} (${measure.measure_code})`;
+        els.measure.appendChild(opt);
       }
-      return body;
     }
 
-    function saveApiBase() {
-      localStorage.setItem("chna_api_base", baseUrl());
-      setStatus(els.connectionStatus, "Saved API base: " + baseUrl(), true);
+    function fillYearSelect(years) {
+      els.year.innerHTML = '<option value="">All Years</option>';
+      for (const year of years) {
+        const opt = document.createElement('option');
+        opt.value = String(year);
+        opt.textContent = String(year);
+        els.year.appendChild(opt);
+      }
+      if (years.length) els.year.value = String(years[0]);
     }
 
-    async function checkHealth() {
-      try {
-        const data = await api("/health");
-        setStatus(els.connectionStatus, "Connected: " + JSON.stringify(data), true);
-      } catch (err) {
-        setStatus(els.connectionStatus, "Health check failed: " + err.message, false);
+    function fillSourceSelect(sources) {
+      els.source.innerHTML = '<option value="">All Sources</option>';
+      for (const source of sources) {
+        const opt = document.createElement('option');
+        opt.value = source;
+        opt.textContent = source;
+        els.source.appendChild(opt);
       }
     }
 
-    async function seedSources() {
+    async function refreshFacets() {
+      const countyGeoId = els.county.value;
+      const query = countyGeoId
+        ? `/metrics/facets?county_geo_id=${encodeURIComponent(countyGeoId)}`
+        : `/metrics/facets?state_fips=${encodeURIComponent(els.state.value)}`;
+      const facets = await CHNA.api(query);
+      fillYearSelect(facets.years || []);
+      fillSourceSelect(facets.sources || []);
+      fillMeasureSelect(facets.measures || []);
+    }
+
+    function refreshCountySelect() {
+      const focusOnly = els.focusToggle.value === 'true';
+      const counties = CHNA.fillCountySelect(els.county, geoOptions.counties, els.state.value, focusOnly);
+      const preferred = counties.find((c) => c.available) || counties[0];
+      if (preferred) {
+        els.county.value = preferred.geo_id;
+      }
+    }
+
+    async function loadData() {
       try {
-        const data = await api("/sources/seed", { method: "POST" });
-        setStatus(els.seedStatus, "Seed complete. Inserted=" + data.inserted + ", Skipped=" + data.skipped, true);
-        await refreshSources();
+        const params = new URLSearchParams();
+        if (els.year.value) params.set('year', els.year.value);
+        if (els.source.value) params.set('source_name', els.source.value);
+        if (els.measure.value) params.set('measure_code', els.measure.value);
+        if (els.county.value) params.set('county_geo_id', els.county.value);
+        else if (els.state.value) params.set('state_fips', els.state.value);
+        params.set('limit', '2000');
+
+        const rows = await CHNA.api(`/metrics?${params.toString()}`);
+        renderMetrics(rows);
+        CHNA.setStatus(els.explorerStatus, `Loaded ${rows.length} row(s).`, 'good');
       } catch (err) {
-        setStatus(els.seedStatus, "Seed failed: " + err.message, false);
+        CHNA.setStatus(els.explorerStatus, `Load failed: ${err.message}`, 'bad');
+      }
+    }
+
+    function chooseTopic(keyword) {
+      keyword = keyword.toLowerCase();
+      const options = Array.from(els.measure.options);
+      const target = options.find((opt) => opt.textContent.toLowerCase().includes(keyword));
+      if (target) {
+        els.measure.value = target.value;
+        loadData();
+      } else {
+        CHNA.setStatus(els.explorerStatus, `No current measure matches "${keyword}" in loaded facets.`, 'bad');
+      }
+    }
+
+    async function runSeedSources() {
+      try {
+        const res = await CHNA.api('/sources/seed', { method: 'POST' });
+        sourceMap = await CHNA.loadSourceMap();
+        CHNA.setStatus(els.refreshStatus, `Sources seeded. Inserted=${res.inserted}, skipped=${res.skipped}.`, 'good');
+      } catch (err) {
+        CHNA.setStatus(els.refreshStatus, `Source seed failed: ${err.message}`, 'bad');
       }
     }
 
     async function runCensus() {
       try {
         const payload = {
-          year: Number(els.censusYear.value),
-          state_fips: els.censusFips.value.trim(),
-          replace_existing: true
+          year: Number(els.year.value || 2024),
+          state_fips: els.state.value || '47',
+          replace_existing: true,
         };
-        const data = await api("/connectors/census-acs/pull", { method: "POST", body: JSON.stringify(payload) });
-        setStatus(els.connectorStatus, "Census run " + data.run_id + " loaded " + data.records_loaded + " rows.", true);
-        await Promise.all([refreshRuns(), loadMetrics()]);
+        const res = await CHNA.api('/connectors/census-acs/pull', {
+          method: 'POST',
+          body: JSON.stringify(payload),
+        });
+        CHNA.setStatus(els.refreshStatus, `Census refresh complete. ${res.records_loaded} row(s) loaded.`, 'good');
+        await refreshFacets();
+        await loadData();
       } catch (err) {
-        setStatus(els.connectorStatus, "Census pull failed: " + err.message, false);
+        CHNA.setStatus(els.refreshStatus, `Census refresh failed: ${err.message}`, 'bad');
       }
     }
 
     async function runPlaces() {
       try {
         const payload = {
-          year: Number(els.placesYear.value),
-          state_abbr: els.placesState.value.trim().toUpperCase(),
-          replace_existing: true
+          year: Number(els.year.value || 2025),
+          state_abbr: selectedStateAbbr() || 'TN',
+          replace_existing: true,
         };
-        const data = await api("/connectors/cdc-places/pull", { method: "POST", body: JSON.stringify(payload) });
-        setStatus(els.connectorStatus, "PLACES run " + data.run_id + " loaded " + data.records_loaded + " rows.", true);
-        await Promise.all([refreshRuns(), loadMetrics()]);
+        const res = await CHNA.api('/connectors/cdc-places/pull', {
+          method: 'POST',
+          body: JSON.stringify(payload),
+        });
+        CHNA.setStatus(els.refreshStatus, `CDC PLACES refresh complete. ${res.records_loaded} row(s) loaded.`, 'good');
+        await refreshFacets();
+        await loadData();
       } catch (err) {
-        setStatus(els.connectorStatus, "PLACES pull failed: " + err.message, false);
+        CHNA.setStatus(els.refreshStatus, `CDC PLACES refresh failed: ${err.message}`, 'bad');
       }
     }
 
-    async function refreshSources() {
-      const sources = await api("/sources");
-      els.sourcesBody.innerHTML = sources
-        .map((s) => "<tr><td>" + s.name + "</td><td>" + s.category + "</td><td>" + s.geography_level + "</td></tr>")
-        .join("");
-      els.kpiSources.textContent = String(sources.length);
-    }
-
-    async function refreshRuns() {
-      const runs = await api("/runs");
-      els.runsBody.innerHTML = runs
-        .map((r) => "<tr><td>" + r.source_name + "</td><td>" + r.run_status + "</td><td>" + r.record_count + "</td><td>" + new Date(r.pulled_at).toLocaleString() + "</td></tr>")
-        .join("");
-      els.kpiRuns.textContent = String(runs.length);
-      els.kpiLastPull.textContent = runs.length ? new Date(runs[0].pulled_at).toLocaleDateString() : "-";
-    }
-
-    function metricQuery() {
-      const params = new URLSearchParams();
-      if (els.metricYear.value) params.set("year", els.metricYear.value);
-      if (els.metricSource.value) params.set("source_name", els.metricSource.value);
-      if (els.metricCode.value.trim()) params.set("measure_code", els.metricCode.value.trim());
-      if (els.geoPrefix.value.trim()) params.set("geo_prefix", els.geoPrefix.value.trim());
-      if (els.metricLimit.value) params.set("limit", els.metricLimit.value);
-      const q = params.toString();
-      return q ? "/metrics?" + q : "/metrics";
-    }
-
-    async function loadMetrics() {
-      try {
-        const rows = await api(metricQuery());
-        metricsCache = rows;
-        els.metricsBody.innerHTML = rows
-          .map((m) => "<tr><td>" + m.source_name + "</td><td>" + m.measure_code + "</td><td>" + m.year + "</td><td>" + m.geo_id + "</td><td>" + m.geo_name + "</td><td>" + m.value + "</td><td>" + m.unit + "</td></tr>")
-          .join("");
-        els.kpiMetrics.textContent = String(rows.length);
-        els.metricsStatus.textContent = "Loaded " + rows.length + " metric rows.";
-      } catch (err) {
-        els.metricsStatus.textContent = "Metrics load failed: " + err.message;
-      }
-    }
-
-    function exportCsv() {
-      if (!metricsCache.length) {
-        els.metricsStatus.textContent = "No metric rows loaded to export.";
+    function downloadRows() {
+      if (!rowsCache.length) {
+        CHNA.setStatus(els.explorerStatus, 'Nothing to download yet. Load data first.', 'bad');
         return;
       }
-      const headers = ["source_name", "measure_code", "measure_name", "year", "geo_id", "geo_name", "value", "unit", "pulled_at"];
-      const rows = metricsCache.map((m) => headers.map((h) => "\"" + String(m[h] ?? "").replaceAll("\"", "\"\"") + "\"").join(","));
-      const csv = [headers.join(","), ...rows].join("\n");
-      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "metrics-export-" + new Date().toISOString().slice(0, 10) + ".csv";
-      a.click();
-      URL.revokeObjectURL(url);
-      els.metricsStatus.textContent = "Exported " + metricsCache.length + " rows to CSV.";
+      const headers = ['source_name', 'measure_code', 'measure_name', 'year', 'geo_id', 'geo_name', 'value', 'unit', 'pulled_at'];
+      const csvRows = rowsCache.map((row) => headers.map((h) => row[h]));
+      CHNA.downloadCsv(`chna-explorer-${new Date().toISOString().slice(0, 10)}.csv`, headers, csvRows);
+      CHNA.setStatus(els.explorerStatus, `Downloaded ${rowsCache.length} row(s).`, 'good');
     }
 
-    function wireEvents() {
-      document.getElementById("saveApiBtn").addEventListener("click", saveApiBase);
-      document.getElementById("healthBtn").addEventListener("click", checkHealth);
-      document.getElementById("seedBtn").addEventListener("click", seedSources);
-      document.getElementById("refreshSourcesBtn").addEventListener("click", refreshSources);
-      document.getElementById("runCensusBtn").addEventListener("click", runCensus);
-      document.getElementById("runPlacesBtn").addEventListener("click", runPlaces);
-      document.getElementById("loadMetricsBtn").addEventListener("click", loadMetrics);
-      document.getElementById("exportCsvBtn").addEventListener("click", exportCsv);
+    async function init() {
+      try {
+        sourceMap = await CHNA.loadSourceMap();
+        geoOptions = await CHNA.loadGeographyOptions();
+
+        CHNA.fillStateSelect(els.state, geoOptions.states);
+        els.state.value = '47';
+        refreshCountySelect();
+        await refreshFacets();
+        await loadData();
+      } catch (err) {
+        CHNA.setStatus(els.explorerStatus, `Initialization failed: ${err.message}`, 'bad');
+      }
+
+      els.state.addEventListener('change', async () => {
+        refreshCountySelect();
+        await refreshFacets();
+        await loadData();
+      });
+      els.county.addEventListener('change', async () => {
+        await refreshFacets();
+        await loadData();
+      });
+      els.focusToggle.addEventListener('change', async () => {
+        refreshCountySelect();
+        await refreshFacets();
+        await loadData();
+      });
+      els.year.addEventListener('change', loadData);
+      els.source.addEventListener('change', loadData);
+      els.measure.addEventListener('change', loadData);
+      els.loadBtn.addEventListener('click', loadData);
+      els.downloadBtn.addEventListener('click', downloadRows);
+      els.seedBtn.addEventListener('click', runSeedSources);
+      els.censusBtn.addEventListener('click', runCensus);
+      els.placesBtn.addEventListener('click', runPlaces);
+      for (const button of els.topicButtons) {
+        button.addEventListener('click', () => chooseTopic(button.dataset.keyword || ''));
+      }
     }
 
-    async function boot() {
-      const stored = localStorage.getItem("chna_api_base");
-      if (stored) els.apiBase.value = stored;
-      wireEvents();
-      await checkHealth();
-      await Promise.all([refreshSources(), refreshRuns(), loadMetrics()]);
-    }
-
-    boot();
+    init();
   </script>
 </body>
 </html>

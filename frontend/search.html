@@ -1,0 +1,257 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CHNA Data Hub - Smart Search</title>
+  <link rel="stylesheet" href="assets/chna.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="app-header">
+      <div class="brand-wrap">
+        <h1 class="brand-title">CHNA Data Hub</h1>
+        <p class="brand-subtitle">Natural-language style retrieval with county and state filters.</p>
+      </div>
+      <nav class="nav-links" aria-label="Main navigation">
+        <a href="index.html">Explorer</a>
+        <a href="search.html" class="active">Smart Search</a>
+        <a href="settings.html">Settings</a>
+      </nav>
+    </header>
+
+    <section class="hero">
+      <h2>Ask for what you need</h2>
+      <p>
+        Enter plain-language prompts like "diabetes trend", "mental health burden", or "obesity rates".
+        Narrow by county and year, then export the retrieved indicators.
+      </p>
+    </section>
+
+    <main class="grid">
+      <section class="card span-12">
+        <h3>Search</h3>
+        <div class="row">
+          <label style="flex: 2 1 360px;">Question or keyword
+            <input id="queryInput" placeholder="e.g. behavioral health indicators for Sullivan County" />
+          </label>
+          <label>State
+            <select id="stateSelect"></select>
+          </label>
+          <label>County
+            <select id="countySelect"></select>
+          </label>
+          <label>Year
+            <input id="yearInput" type="number" placeholder="Any" />
+          </label>
+          <label>Source
+            <select id="sourceSelect"><option value="">Any source</option></select>
+          </label>
+          <label>Limit
+            <input id="limitInput" type="number" min="1" max="200" value="25" />
+          </label>
+        </div>
+        <div class="topic-chips" style="margin-top:10px;">
+          <button class="secondary preset" data-q="diabetes">Diabetes</button>
+          <button class="secondary preset" data-q="heart disease">Heart Disease</button>
+          <button class="secondary preset" data-q="cancer incidence">Cancer</button>
+          <button class="secondary preset" data-q="deaths of despair">Deaths of Despair</button>
+          <button class="secondary preset" data-q="obesity">Obesity</button>
+          <button class="secondary preset" data-q="access to care">Access to Care</button>
+        </div>
+        <div class="row" style="margin-top:10px;">
+          <button id="searchBtn">Run Search</button>
+          <button id="downloadBtn" class="secondary">Download Search CSV</button>
+          <button id="clearBtn" class="secondary">Clear</button>
+          <label style="flex:0 0 220px;">
+            <span>Focus Region Only</span>
+            <select id="focusToggle">
+              <option value="true">Yes (NE TN + SW VA)</option>
+              <option value="false">No (all available counties)</option>
+            </select>
+          </label>
+        </div>
+        <div id="searchStatus" class="status"></div>
+      </section>
+
+      <section class="card span-12">
+        <h3>Search Summary</h3>
+        <p id="summaryText" class="helper">Run a search to generate a quick summary.</p>
+      </section>
+
+      <section class="card span-12">
+        <h3>Results</h3>
+        <div id="resultList" class="grid" style="grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 10px;"></div>
+      </section>
+    </main>
+  </div>
+
+  <footer class="source-bar" aria-label="Source attribution">
+    <div id="sourceBar" class="source-bar-inner"></div>
+  </footer>
+
+  <script src="assets/chna.js"></script>
+  <script>
+    const els = {
+      query: document.getElementById('queryInput'),
+      state: document.getElementById('stateSelect'),
+      county: document.getElementById('countySelect'),
+      year: document.getElementById('yearInput'),
+      source: document.getElementById('sourceSelect'),
+      limit: document.getElementById('limitInput'),
+      searchBtn: document.getElementById('searchBtn'),
+      clearBtn: document.getElementById('clearBtn'),
+      downloadBtn: document.getElementById('downloadBtn'),
+      focusToggle: document.getElementById('focusToggle'),
+      searchStatus: document.getElementById('searchStatus'),
+      summary: document.getElementById('summaryText'),
+      resultList: document.getElementById('resultList'),
+      sourceBar: document.getElementById('sourceBar'),
+      presets: Array.from(document.querySelectorAll('.preset')),
+    };
+
+    let geoOptions = { states: [], counties: [] };
+    let lastResponse = { items: [], sources: [], query: '' };
+
+    function selectedStateAbbr() {
+      const selected = geoOptions.states.find((s) => s.fips === els.state.value);
+      return selected ? selected.abbr : '';
+    }
+
+    function refreshCountySelect() {
+      const focusOnly = els.focusToggle.value === 'true';
+      const counties = CHNA.fillCountySelect(els.county, geoOptions.counties, els.state.value, focusOnly);
+      const preferred = counties.find((c) => c.available) || counties[0];
+      if (preferred) els.county.value = preferred.geo_id;
+    }
+
+    async function loadSources() {
+      const sources = await CHNA.api('/sources');
+      els.source.innerHTML = '<option value="">Any source</option>';
+      for (const source of sources) {
+        const opt = document.createElement('option');
+        opt.value = source.name;
+        opt.textContent = source.name;
+        els.source.appendChild(opt);
+      }
+    }
+
+    function renderResults(items) {
+      if (!items.length) {
+        els.resultList.innerHTML = '<div class="card span-12">No matching indicators found for this search.</div>';
+        return;
+      }
+
+      const html = items
+        .map((item) => {
+          return `<article class="result-card" style="grid-column: span 6;">
+            <h4>${CHNA.escapeHtml(item.measure_name)} <span class="helper">(${CHNA.escapeHtml(item.measure_code)})</span></h4>
+            <div class="result-meta">
+              <span><strong>Value:</strong> ${CHNA.formatNumber(item.value)} ${CHNA.escapeHtml(item.unit)}</span>
+              <span><strong>Year:</strong> ${item.year}</span>
+              <span><strong>County:</strong> ${CHNA.escapeHtml(item.geo_name)}</span>
+              <span><strong>Source:</strong> ${CHNA.escapeHtml(item.source_name)}</span>
+              <span><strong>Match score:</strong> ${CHNA.formatNumber(item.score)}</span>
+            </div>
+          </article>`;
+        })
+        .join('');
+      els.resultList.innerHTML = html;
+    }
+
+    function renderSummary(payload) {
+      const items = payload.items || [];
+      if (!items.length) {
+        els.summary.textContent = 'No signals found. Try broader terms or remove a filter.';
+        return;
+      }
+
+      const top = items[0];
+      const sourceCount = new Set(items.map((i) => i.source_name)).size;
+      els.summary.textContent = `Found ${items.length} indicator match(es) across ${sourceCount} source(s) for "${payload.query}". Top result: ${top.measure_name} in ${top.geo_name} (${top.year}).`;
+    }
+
+    async function runSearch() {
+      try {
+        const q = (els.query.value || '').trim();
+        if (q.length < 2) {
+          CHNA.setStatus(els.searchStatus, 'Please enter at least 2 characters.', 'bad');
+          return;
+        }
+
+        const params = new URLSearchParams();
+        params.set('q', q);
+        params.set('state_fips', els.state.value);
+        if (els.county.value) params.set('county_geo_id', els.county.value);
+        if (els.year.value) params.set('year', els.year.value);
+        if (els.source.value) params.set('source_name', els.source.value);
+        if (els.limit.value) params.set('limit', els.limit.value);
+
+        const payload = await CHNA.api(`/search?${params.toString()}`);
+        lastResponse = payload;
+        renderResults(payload.items || []);
+        renderSummary(payload);
+        CHNA.renderSourceBar(els.sourceBar, payload.sources || []);
+        CHNA.setStatus(els.searchStatus, `Search complete. ${payload.total_results} result(s).`, 'good');
+      } catch (err) {
+        CHNA.setStatus(els.searchStatus, `Search failed: ${err.message}`, 'bad');
+      }
+    }
+
+    function clearSearch() {
+      els.query.value = '';
+      els.year.value = '';
+      els.source.value = '';
+      els.limit.value = '25';
+      els.resultList.innerHTML = '';
+      els.summary.textContent = 'Run a search to generate a quick summary.';
+      CHNA.renderSourceBar(els.sourceBar, []);
+      CHNA.setStatus(els.searchStatus, '', null);
+      lastResponse = { items: [], sources: [], query: '' };
+    }
+
+    function downloadSearchCsv() {
+      const items = lastResponse.items || [];
+      if (!items.length) {
+        CHNA.setStatus(els.searchStatus, 'No search results to download.', 'bad');
+        return;
+      }
+      const headers = ['source_name', 'measure_code', 'measure_name', 'year', 'geo_id', 'geo_name', 'value', 'unit', 'score'];
+      const rows = items.map((item) => headers.map((h) => item[h]));
+      CHNA.downloadCsv(`chna-search-${new Date().toISOString().slice(0, 10)}.csv`, headers, rows);
+      CHNA.setStatus(els.searchStatus, `Downloaded ${items.length} search result(s).`, 'good');
+    }
+
+    async function init() {
+      geoOptions = await CHNA.loadGeographyOptions();
+      CHNA.fillStateSelect(els.state, geoOptions.states);
+      els.state.value = '47';
+      refreshCountySelect();
+      await loadSources();
+      CHNA.renderSourceBar(els.sourceBar, []);
+
+      els.state.addEventListener('change', refreshCountySelect);
+      els.focusToggle.addEventListener('change', refreshCountySelect);
+      els.searchBtn.addEventListener('click', runSearch);
+      els.clearBtn.addEventListener('click', clearSearch);
+      els.downloadBtn.addEventListener('click', downloadSearchCsv);
+      els.query.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          runSearch();
+        }
+      });
+      for (const button of els.presets) {
+        button.addEventListener('click', () => {
+          els.query.value = button.dataset.q || '';
+          runSearch();
+        });
+      }
+    }
+
+    init().catch((err) => {
+      CHNA.setStatus(els.searchStatus, `Initialization failed: ${err.message}`, 'bad');
+    });
+  </script>
+</body>
+</html>

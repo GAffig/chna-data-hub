@@ -3,17 +3,14 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from .api import connectors, metrics, runs, sources
+from .api import connectors, geography, metrics, runs, search, sources
 from .db import Base, engine
 
 Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="CHNA Data Hub API", version="0.3.0")
+app = FastAPI(title="CHNA Data Hub API", version="0.4.0")
 
-raw_origins = os.getenv(
-    "APP_CORS_ORIGINS",
-    "*",
-)
+raw_origins = os.getenv("APP_CORS_ORIGINS", "*")
 allowed_origins = [origin.strip() for origin in raw_origins.split(",") if origin.strip()]
 allow_any_origin = "*" in allowed_origins
 
@@ -35,3 +32,5 @@ app.include_router(sources.router)
 app.include_router(runs.router)
 app.include_router(connectors.router)
 app.include_router(metrics.router)
+app.include_router(geography.router)
+app.include_router(search.router)
