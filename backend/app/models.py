@@ -1,4 +1,4 @@
-﻿from datetime import datetime
+from datetime import datetime
 
 from sqlalchemy import DateTime, Float, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
@@ -47,10 +47,10 @@ class CommunityMetric(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     source_name: Mapped[str] = mapped_column(String(255), nullable=False)
-    measure_code: Mapped[str] = mapped_column(String(100), nullable=False)
+    measure_code: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
     measure_name: Mapped[str] = mapped_column(String(255), nullable=False)
     unit: Mapped[str] = mapped_column(String(50), nullable=False)
-    year: Mapped[int] = mapped_column(Integer, nullable=False)
+    year: Mapped[int] = mapped_column(Integer, nullable=False, index=True)
     geo_id: Mapped[str] = mapped_column(String(20), nullable=False, index=True)
     geo_name: Mapped[str] = mapped_column(String(255), nullable=False)
     value: Mapped[float] = mapped_column(Float, nullable=False)

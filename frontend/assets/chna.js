@@ -1,4 +1,4 @@
-﻿(function () {
+(function () {
   const STORAGE_KEY = 'chna_api_base';
   const DEFAULT_API = 'http://localhost:8000';
 
@@ -78,11 +78,6 @@
     URL.revokeObjectURL(url);
   }
 
-  function parseStateFips(geoId) {
-    const value = String(geoId || '');
-    return value.length >= 2 ? value.slice(0, 2) : '';
-  }
-
   function renderSourceBar(container, sources) {
     if (!container) return;
     const items = Array.isArray(sources) ? sources : [];
@@ -94,11 +89,12 @@
     const chips = items
       .map((source) => {
         const name = escapeHtml(source.name || 'Unknown Source');
+        const citation = escapeHtml(source.citation || '');
         const url = source.url ? String(source.url) : '';
         if (url) {
-          return `<a class="source-chip" href="${escapeHtml(url)}" target="_blank" rel="noopener">${name}</a>`;
+          return `<a class="source-chip" href="${escapeHtml(url)}" title="${citation}" target="_blank" rel="noopener">${name}</a>`;
         }
-        return `<span class="source-chip">${name}</span>`;
+        return `<span class="source-chip" title="${citation}">${name}</span>`;
       })
       .join('');
 
@@ -152,18 +148,28 @@
       const opt = document.createElement('option');
       opt.value = county.geo_id;
       const availability = county.available ? '' : ' (no local data yet)';
-      opt.textContent = `${county.name}${availability}`;
-      select.appendChild(opt);
-    }
-
-    if (!filtered.length) {
-      const opt = document.createElement('option');
-      opt.value = '';
-      opt.textContent = 'No counties available';
+      opt.textContent = `${county.name}, ${county.state_abbr}${availability}`;
       select.appendChild(opt);
     }
 
     return filtered;
+  }
+
+  function getSelectedValues(select) {
+    if (!select) return [];
+    return Array.from(select.selectedOptions || []).map((opt) => opt.value).filter(Boolean);
+  }
+
+  function setSelectedValues(select, values) {
+    const target = new Set(values || []);
+    for (const opt of Array.from(select.options || [])) {
+      opt.selected = target.has(opt.value);
+    }
+  }
+
+  function parseStateFips(geoId) {
+    const value = String(geoId || '');
+    return value.length >= 2 ? value.slice(0, 2) : '';
   }
 
   function mapSourceAttributionFromRows(rows, sourceMap) {
@@ -191,12 +197,14 @@
     escapeHtml,
     formatNumber,
     downloadCsv,
-    parseStateFips,
     renderSourceBar,
     loadSourceMap,
     loadGeographyOptions,
     fillStateSelect,
     fillCountySelect,
+    getSelectedValues,
+    setSelectedValues,
+    parseStateFips,
     mapSourceAttributionFromRows,
   };
 })();

@@ -61,15 +61,6 @@ def test_metrics_export_csv_ok() -> None:
     assert 'source_name,measure_code,measure_name' in response.text
 
 
-def test_search_endpoint_ok() -> None:
+def test_legacy_search_endpoint_retired() -> None:
     response = client.get('/search?q=diabetes')
-    assert response.status_code == 200
-    payload = response.json()
-    assert payload['query'] == 'diabetes'
-    assert isinstance(payload['items'], list)
-    assert isinstance(payload['sources'], list)
-
-
-def test_search_query_validation() -> None:
-    response = client.get('/search?q=d')
-    assert response.status_code == 422
+    assert response.status_code == 404

@@ -5,13 +5,14 @@ Manager-friendly CHNA data retrieval app for Ballad Population Health teams.
 ## What This Version Delivers
 
 - Multi-page web app for non-technical users:
-  - `Explorer` (state/county selection -> indicators -> CSV download)
-  - `Smart Search` (plain-language style query with source-cited results)
+  - `Explorer` (state + multi-county selection -> indicators -> CSV download)
+  - `Smart Search` (internet-first natural-language retrieval from trusted CHNA references)
   - `Settings` (health check, source seed, connector refresh, run history)
 - Focused geography defaults for Northeast Tennessee and Southwest Virginia
 - Persistent source attribution bar in UI
 - Source registry seeded from your BRMC CHNA references
 - Connector-backed ingestion from Census ACS and CDC PLACES
+- Live research endpoint that queries public source APIs directly (not local DB)
 
 ## Tech Stack
 
@@ -56,7 +57,7 @@ Open `http://localhost:8080`.
 - `POST /connectors/census-acs/pull`
 - `POST /connectors/cdc-places/pull`
 - `GET /geography/options`
-- `GET /search`
+- `GET /research/search`
 - `GET /metrics`
 - `GET /metrics/facets`
 - `GET /metrics/export/csv`
@@ -68,6 +69,7 @@ Open `http://localhost:8080`.
 - `measure_code`
 - `state_fips`
 - `county_geo_id`
+- `county_geo_ids` (comma-separated list)
 - `geo_prefix`
 - `limit` (1 to 5000)
 
@@ -80,6 +82,20 @@ The interface includes quick topic presets aligned to your CHNA priorities and a
 - Access-related indicators
 
 It is intentionally not limited to only those topics.
+
+## Internet-First Research Mode
+
+`/research/search` interprets natural language and pulls live rows from prioritized external sources.
+
+Current live connectors:
+- US Census ACS API (income, population)
+- CDC PLACES API (diabetes, obesity)
+
+Response includes:
+- interpreted intent (metric/geography/time scope)
+- normalized rows
+- source attribution links
+- retrieval note for export/readability
 
 ## Share With A Colleague
 
@@ -95,5 +111,5 @@ If needed, set `APP_CORS_ORIGINS` in backend env to restrict allowed browser ori
 ```bash
 cd backend
 python -m ruff check .
-python -m pytest -q tests/test_health.py tests/test_seed_and_metrics.py tests/test_geography_and_search.py
+python -m pytest -q tests/test_health.py tests/test_seed_and_metrics.py tests/test_geography_and_search.py tests/test_research.py
 ```

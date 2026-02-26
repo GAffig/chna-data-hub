@@ -28,3 +28,9 @@ def test_cdc_places_endpoint_validation() -> None:
 def test_metrics_limit_validation() -> None:
     response = client.get('/metrics?limit=99999')
     assert response.status_code == 422
+
+
+def test_metrics_multi_county_filter_validation() -> None:
+    response = client.get('/metrics?county_geo_ids=47059,47163&limit=10')
+    assert response.status_code == 200
+    assert isinstance(response.json(), list)

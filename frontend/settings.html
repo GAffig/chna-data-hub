@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -7,77 +7,74 @@
   <link rel="stylesheet" href="assets/chna.css" />
 </head>
 <body>
-  <div class="app-shell">
-    <header class="app-header">
-      <div class="brand-wrap">
+  <div class="shell">
+    <header class="top">
+      <div>
         <h1 class="brand-title">CHNA Data Hub</h1>
-        <p class="brand-subtitle">Operational settings and data refresh controls.</p>
+        <p class="brand-subtitle">Admin controls for source seeding and connector pulls.</p>
       </div>
-      <nav class="nav-links" aria-label="Main navigation">
+      <nav class="nav" aria-label="Main navigation">
         <a href="index.html">Explorer</a>
         <a href="search.html">Smart Search</a>
         <a href="settings.html" class="active">Settings</a>
       </nav>
     </header>
 
-    <section class="hero">
-      <h2>System setup for daily team use</h2>
-      <p>
-        Set the API endpoint, verify health, refresh sources and data connectors, then review run history.
-        Keep this page for admins; most users can stay in Explorer or Smart Search.
-      </p>
+    <section class="hero fade-up">
+      <h2>Operational controls</h2>
+      <p>Use this page only for setup and refresh operations. Analysts can stay in Explorer or Smart Search.</p>
     </section>
 
     <main class="grid">
-      <section class="card span-6">
+      <section class="panel span-6 fade-up">
         <h3>Connection</h3>
         <div class="row">
-          <label style="flex: 1 1 320px;">API Base URL
+          <label style="flex:1 1 300px;">API Base URL
             <input id="apiInput" placeholder="http://localhost:8000" />
           </label>
-          <button id="saveBtn" class="secondary">Save</button>
+          <button id="saveApiBtn" class="alt">Save</button>
           <button id="healthBtn">Check Health</button>
         </div>
         <div id="connectionStatus" class="status"></div>
       </section>
 
-      <section class="card span-6">
+      <section class="panel span-6 fade-up">
         <h3>Source Registry</h3>
-        <p class="helper">Initialize or refresh CHNA source references from your BRMC reference set.</p>
-        <div class="row">
-          <button id="seedBtn">Seed Sources</button>
-          <button id="reloadSourcesBtn" class="secondary">Reload Source Count</button>
+        <p class="helper">Seed sources from the BRMC references and reload source attribution chips.</p>
+        <div class="row" style="margin-top:8px;">
+          <button id="seedSourcesBtn">Seed Sources</button>
+          <button id="reloadSourcesBtn" class="alt">Reload Sources</button>
         </div>
-        <div id="sourceStatus" class="status"></div>
+        <div id="catalogStatus" class="status"></div>
       </section>
 
-      <section class="card span-12">
-        <h3>Connector Operations</h3>
-        <div class="row" style="margin-bottom: 8px;">
-          <label>Census Year
-            <input id="censusYear" type="number" value="2024" />
+      <section class="panel span-12 fade-up">
+        <h3>Connector Pulls</h3>
+        <div class="row" style="margin-bottom:10px;">
+          <label>Census ACS Year
+            <input id="censusYearInput" type="number" value="2024" />
           </label>
-          <label>Census State FIPS
-            <input id="censusState" value="47" maxlength="2" />
+          <label>State FIPS
+            <input id="censusStateInput" value="47" maxlength="2" />
           </label>
-          <button id="runCensusBtn">Run Census ACS Pull</button>
+          <button id="runCensusBtn">Run Census Pull</button>
         </div>
         <div class="row">
-          <label>PLACES Year
-            <input id="placesYear" type="number" value="2025" />
+          <label>CDC PLACES Year
+            <input id="placesYearInput" type="number" value="2025" />
           </label>
-          <label>PLACES State Abbr
-            <input id="placesState" value="TN" maxlength="2" />
+          <label>State Abbreviation
+            <input id="placesStateInput" value="TN" maxlength="2" />
           </label>
-          <button id="runPlacesBtn" class="warn">Run CDC PLACES Pull</button>
+          <button id="runPlacesBtn" class="warn">Run PLACES Pull</button>
         </div>
         <div id="connectorStatus" class="status"></div>
       </section>
 
-      <section class="card span-12">
+      <section class="panel span-12 fade-up">
         <h3>Recent Ingestion Runs</h3>
-        <div class="row" style="margin-bottom: 8px;">
-          <button id="reloadRunsBtn" class="secondary">Refresh Run History</button>
+        <div class="row" style="margin-bottom:8px;">
+          <button id="reloadRunsBtn" class="alt">Refresh Run History</button>
         </div>
         <div class="table-wrap">
           <table>
@@ -97,27 +94,27 @@
     </main>
   </div>
 
-  <footer class="source-bar" aria-label="Source attribution">
-    <div id="sourceBar" class="source-bar-inner"></div>
+  <footer class="foot" aria-label="Source attribution">
+    <div id="sourceBar" class="foot-inner"></div>
   </footer>
 
   <script src="assets/chna.js"></script>
   <script>
     const els = {
       apiInput: document.getElementById('apiInput'),
-      saveBtn: document.getElementById('saveBtn'),
+      saveApiBtn: document.getElementById('saveApiBtn'),
       healthBtn: document.getElementById('healthBtn'),
-      seedBtn: document.getElementById('seedBtn'),
+      seedSourcesBtn: document.getElementById('seedSourcesBtn'),
       reloadSourcesBtn: document.getElementById('reloadSourcesBtn'),
       runCensusBtn: document.getElementById('runCensusBtn'),
       runPlacesBtn: document.getElementById('runPlacesBtn'),
       reloadRunsBtn: document.getElementById('reloadRunsBtn'),
-      censusYear: document.getElementById('censusYear'),
-      censusState: document.getElementById('censusState'),
-      placesYear: document.getElementById('placesYear'),
-      placesState: document.getElementById('placesState'),
+      censusYearInput: document.getElementById('censusYearInput'),
+      censusStateInput: document.getElementById('censusStateInput'),
+      placesYearInput: document.getElementById('placesYearInput'),
+      placesStateInput: document.getElementById('placesStateInput'),
       connectionStatus: document.getElementById('connectionStatus'),
-      sourceStatus: document.getElementById('sourceStatus'),
+      catalogStatus: document.getElementById('catalogStatus'),
       connectorStatus: document.getElementById('connectorStatus'),
       runsBody: document.getElementById('runsBody'),
       sourceBar: document.getElementById('sourceBar'),
@@ -132,51 +129,30 @@
       }
     }
 
-    async function reloadRuns() {
+    async function seedSources() {
       try {
-        const runs = await CHNA.api('/runs');
-        const html = runs
-          .map(
-            (run) => `<tr>
-              <td>${CHNA.escapeHtml(run.source_name)}</td>
-              <td>${CHNA.escapeHtml(run.run_status)}</td>
-              <td>${CHNA.formatNumber(run.record_count)}</td>
-              <td>${CHNA.escapeHtml(run.notes || '')}</td>
-              <td>${new Date(run.pulled_at).toLocaleString()}</td>
-            </tr>`
-          )
-          .join('');
-        els.runsBody.innerHTML = html || '<tr><td colspan="5">No runs yet.</td></tr>';
+        const payload = await CHNA.api('/sources/seed', { method: 'POST' });
+        CHNA.setStatus(els.catalogStatus, `Sources seeded. Inserted=${payload.inserted}, skipped=${payload.skipped}.`, 'good');
+        await reloadSources();
       } catch (err) {
-        CHNA.setStatus(els.connectorStatus, `Could not load runs: ${err.message}`, 'bad');
+        CHNA.setStatus(els.catalogStatus, `Source seed failed: ${err.message}`, 'bad');
       }
     }
 
     async function reloadSources() {
       try {
         const sources = await CHNA.api('/sources');
-        CHNA.setStatus(els.sourceStatus, `${sources.length} source records available.`, 'good');
-        CHNA.renderSourceBar(els.sourceBar, sources.slice(0, 20));
+        CHNA.renderSourceBar(els.sourceBar, sources.slice(0, 30));
       } catch (err) {
-        CHNA.setStatus(els.sourceStatus, `Could not load sources: ${err.message}`, 'bad');
-      }
-    }
-
-    async function seedSources() {
-      try {
-        const result = await CHNA.api('/sources/seed', { method: 'POST' });
-        CHNA.setStatus(els.sourceStatus, `Seed complete. Inserted=${result.inserted}, skipped=${result.skipped}.`, 'good');
-        await reloadSources();
-      } catch (err) {
-        CHNA.setStatus(els.sourceStatus, `Seed failed: ${err.message}`, 'bad');
+        CHNA.setStatus(els.catalogStatus, `Load sources failed: ${err.message}`, 'bad');
       }
     }
 
     async function runCensusPull() {
       try {
         const payload = {
-          year: Number(els.censusYear.value || 2024),
-          state_fips: (els.censusState.value || '47').trim(),
+          year: Number(els.censusYearInput.value || 2024),
+          state_fips: (els.censusStateInput.value || '47').trim(),
           replace_existing: true,
         };
         const result = await CHNA.api('/connectors/census-acs/pull', {
@@ -193,8 +169,8 @@
     async function runPlacesPull() {
       try {
         const payload = {
-          year: Number(els.placesYear.value || 2025),
-          state_abbr: (els.placesState.value || 'TN').trim().toUpperCase(),
+          year: Number(els.placesYearInput.value || 2025),
+          state_abbr: (els.placesStateInput.value || 'TN').trim().toUpperCase(),
           replace_existing: true,
         };
         const result = await CHNA.api('/connectors/cdc-places/pull', {
@@ -208,10 +184,27 @@
       }
     }
 
+    async function reloadRuns() {
+      try {
+        const runs = await CHNA.api('/runs');
+        els.runsBody.innerHTML = runs
+          .map((run) => `<tr>
+            <td>${CHNA.escapeHtml(run.source_name)}</td>
+            <td>${CHNA.escapeHtml(run.run_status)}</td>
+            <td>${CHNA.formatNumber(run.record_count)}</td>
+            <td>${CHNA.escapeHtml(run.notes || '')}</td>
+            <td>${new Date(run.pulled_at).toLocaleString()}</td>
+          </tr>`)
+          .join('') || '<tr><td colspan="5">No runs available yet.</td></tr>';
+      } catch (err) {
+        CHNA.setStatus(els.connectorStatus, `Run history load failed: ${err.message}`, 'bad');
+      }
+    }
+
     function saveApiBase() {
       try {
-        const value = CHNA.setApiBase(els.apiInput.value);
-        CHNA.setStatus(els.connectionStatus, `Saved API base: ${value}`, 'good');
+        const saved = CHNA.setApiBase(els.apiInput.value);
+        CHNA.setStatus(els.connectionStatus, `Saved API base: ${saved}`, 'good');
       } catch (err) {
         CHNA.setStatus(els.connectionStatus, err.message, 'bad');
       }
@@ -222,16 +215,18 @@
       CHNA.renderSourceBar(els.sourceBar, []);
       await Promise.all([checkHealth(), reloadSources(), reloadRuns()]);
 
-      els.saveBtn.addEventListener('click', saveApiBase);
+      els.saveApiBtn.addEventListener('click', saveApiBase);
       els.healthBtn.addEventListener('click', checkHealth);
-      els.seedBtn.addEventListener('click', seedSources);
+      els.seedSourcesBtn.addEventListener('click', seedSources);
       els.reloadSourcesBtn.addEventListener('click', reloadSources);
       els.runCensusBtn.addEventListener('click', runCensusPull);
       els.runPlacesBtn.addEventListener('click', runPlacesPull);
       els.reloadRunsBtn.addEventListener('click', reloadRuns);
     }
 
-    init();
+    init().catch((err) => {
+      CHNA.setStatus(els.connectionStatus, `Initialization failed: ${err.message}`, 'bad');
+    });
   </script>
 </body>
 </html>

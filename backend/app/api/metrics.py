@@ -1,4 +1,5 @@
-﻿import csv
+import csv
+import re
 from io import StringIO
 
 from fastapi import APIRouter, Depends, Query, Response
@@ -12,6 +13,18 @@ from ..schemas import CommunityMetricRead, MetricsFacetMeasure, MetricsFacetsRes
 router = APIRouter(prefix="/metrics", tags=["metrics"])
 
 
+def _parse_county_geo_ids(county_geo_ids: str | None) -> list[str]:
+    if not county_geo_ids:
+        return []
+
+    valid = []
+    for item in county_geo_ids.split(","):
+        code = item.strip()
+        if re.fullmatch(r"\d{5}", code):
+            valid.append(code)
+    return sorted(set(valid))
+
+
 def _apply_metric_filters(
     query,
     *,
@@ -21,6 +34,7 @@ def _apply_metric_filters(
     geo_prefix: str | None,
     state_fips: str | None,
     county_geo_id: str | None,
+    county_geo_ids: str | None,
 ):
     if year is not None:
         query = query.filter(CommunityMetric.year == year)
@@ -30,6 +44,10 @@ def _apply_metric_filters(
         query = query.filter(CommunityMetric.measure_code == measure_code)
     if county_geo_id:
         query = query.filter(CommunityMetric.geo_id == county_geo_id)
+    elif county_geo_ids:
+        geo_ids = _parse_county_geo_ids(county_geo_ids)
+        if geo_ids:
+            query = query.filter(CommunityMetric.geo_id.in_(geo_ids))
     else:
         effective_geo_prefix = geo_prefix or state_fips
         if effective_geo_prefix:
@@ -41,6 +59,7 @@ def _apply_metric_filters(
 def metrics_facets(
     state_fips: str | None = Query(default=None, min_length=2, max_length=2),
     county_geo_id: str | None = Query(default=None, min_length=5, max_length=5),
+    county_geo_ids: str | None = Query(default=None),
     db: Session = Depends(get_db),
 ):
     base = db.query(CommunityMetric)
@@ -52,6 +71,7 @@ def metrics_facets(
         geo_prefix=None,
         state_fips=state_fips,
         county_geo_id=county_geo_id,
+        county_geo_ids=county_geo_ids,
     )
 
     years = [
@@ -90,6 +110,7 @@ def export_metrics_csv(
     geo_prefix: str | None = Query(default=None),
     state_fips: str | None = Query(default=None, min_length=2, max_length=2),
     county_geo_id: str | None = Query(default=None, min_length=5, max_length=5),
+    county_geo_ids: str | None = Query(default=None),
     limit: int = Query(default=2000, ge=1, le=10000),
     db: Session = Depends(get_db),
 ):
@@ -102,6 +123,7 @@ def export_metrics_csv(
         geo_prefix=geo_prefix,
         state_fips=state_fips,
         county_geo_id=county_geo_id,
+        county_geo_ids=county_geo_ids,
     )
     rows = query.order_by(CommunityMetric.year.desc(), CommunityMetric.geo_id.asc()).limit(limit).all()
 
@@ -144,6 +166,7 @@ def list_metrics(
     geo_prefix: str | None = Query(default=None),
     state_fips: str | None = Query(default=None, min_length=2, max_length=2),
     county_geo_id: str | None = Query(default=None, min_length=5, max_length=5),
+    county_geo_ids: str | None = Query(default=None),
     limit: int = Query(default=500, ge=1, le=5000),
     db: Session = Depends(get_db),
 ):
@@ -156,6 +179,7 @@ def list_metrics(
         geo_prefix=geo_prefix,
         state_fips=state_fips,
         county_geo_id=county_geo_id,
+        county_geo_ids=county_geo_ids,
     )
 
     return query.order_by(CommunityMetric.year.desc(), CommunityMetric.geo_id.asc()).limit(limit).all()

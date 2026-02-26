@@ -108,25 +108,6 @@ class SourceAttributionRead(BaseModel):
     category: str
 
 
-class SearchResultRead(BaseModel):
-    source_name: str
-    measure_code: str
-    measure_name: str
-    unit: str
-    year: int
-    geo_id: str
-    geo_name: str
-    value: float
-    score: float
-
-
-class SearchResponse(BaseModel):
-    query: str
-    total_results: int
-    items: list[SearchResultRead]
-    sources: list[SourceAttributionRead]
-
-
 class MetricsFacetMeasure(BaseModel):
     measure_code: str
     measure_name: str
@@ -137,3 +118,37 @@ class MetricsFacetsResponse(BaseModel):
     sources: list[str]
     measures: list[MetricsFacetMeasure]
     counties: list[str]
+
+
+class ResearchIntentRead(BaseModel):
+    metric_key: str
+    metric_name: str
+    domain: str
+    year: int | None
+    is_latest: bool
+    states: list[str]
+    counties: list[str]
+    geography_scope: str
+    source_priority: list[str]
+
+
+class ResearchResultRead(BaseModel):
+    metric_key: str
+    metric_name: str
+    year: int
+    geo_id: str
+    geo_name: str
+    value: float
+    unit: str
+    source_name: str
+    source_url: str
+    retrieved_at: datetime
+
+
+class ResearchSearchResponse(BaseModel):
+    query: str
+    intent: ResearchIntentRead
+    total_results: int
+    items: list[ResearchResultRead]
+    sources: list[SourceAttributionRead]
+    note: str

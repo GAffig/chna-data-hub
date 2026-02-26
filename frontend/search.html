@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -7,251 +7,232 @@
   <link rel="stylesheet" href="assets/chna.css" />
 </head>
 <body>
-  <div class="app-shell">
-    <header class="app-header">
-      <div class="brand-wrap">
+  <div class="shell">
+    <header class="top">
+      <div>
         <h1 class="brand-title">CHNA Data Hub</h1>
-        <p class="brand-subtitle">Natural-language style retrieval with county and state filters.</p>
+        <p class="brand-subtitle">Internet-first CHNA search from trusted sources, with export-ready results.</p>
       </div>
-      <nav class="nav-links" aria-label="Main navigation">
+      <nav class="nav" aria-label="Main navigation">
         <a href="index.html">Explorer</a>
         <a href="search.html" class="active">Smart Search</a>
         <a href="settings.html">Settings</a>
       </nav>
     </header>
 
-    <section class="hero">
-      <h2>Ask for what you need</h2>
-      <p>
-        Enter plain-language prompts like "diabetes trend", "mental health burden", or "obesity rates".
-        Narrow by county and year, then export the retrieved indicators.
-      </p>
+    <section class="hero fade-up">
+      <h2>Ask a research question</h2>
+      <p>Example: "latest per capita income data for NE TN", "household income for Sullivan County 2022", or "diabetes in SW VA".</p>
     </section>
 
     <main class="grid">
-      <section class="card span-12">
-        <h3>Search</h3>
-        <div class="row">
-          <label style="flex: 2 1 360px;">Question or keyword
-            <input id="queryInput" placeholder="e.g. behavioral health indicators for Sullivan County" />
+      <section class="panel span-12 fade-up">
+        <h3>Question</h3>
+        <div class="composer">
+          <label>Natural-language query
+            <textarea id="queryInput" placeholder="Type your CHNA data question..."></textarea>
           </label>
-          <label>State
-            <select id="stateSelect"></select>
-          </label>
-          <label>County
-            <select id="countySelect"></select>
-          </label>
-          <label>Year
-            <input id="yearInput" type="number" placeholder="Any" />
-          </label>
-          <label>Source
-            <select id="sourceSelect"><option value="">Any source</option></select>
-          </label>
-          <label>Limit
-            <input id="limitInput" type="number" min="1" max="200" value="25" />
-          </label>
+          <div class="stack">
+            <button id="searchBtn">Run Search</button>
+            <button id="downloadBtn" class="alt">Download CSV</button>
+            <button id="clearBtn" class="alt">Clear</button>
+          </div>
         </div>
-        <div class="topic-chips" style="margin-top:10px;">
-          <button class="secondary preset" data-q="diabetes">Diabetes</button>
-          <button class="secondary preset" data-q="heart disease">Heart Disease</button>
-          <button class="secondary preset" data-q="cancer incidence">Cancer</button>
-          <button class="secondary preset" data-q="deaths of despair">Deaths of Despair</button>
-          <button class="secondary preset" data-q="obesity">Obesity</button>
-          <button class="secondary preset" data-q="access to care">Access to Care</button>
-        </div>
-        <div class="row" style="margin-top:10px;">
-          <button id="searchBtn">Run Search</button>
-          <button id="downloadBtn" class="secondary">Download Search CSV</button>
-          <button id="clearBtn" class="secondary">Clear</button>
-          <label style="flex:0 0 220px;">
-            <span>Focus Region Only</span>
-            <select id="focusToggle">
-              <option value="true">Yes (NE TN + SW VA)</option>
-              <option value="false">No (all available counties)</option>
-            </select>
-          </label>
+        <div class="chips" style="margin-top:10px;">
+          <button class="alt preset" data-query="latest per capita income for NE TN counties">Latest income (NE TN)</button>
+          <button class="alt preset" data-query="household income for Washington County TN in 2022">Household income 2022</button>
+          <button class="alt preset" data-query="diabetes in SW VA latest">Diabetes (SW VA)</button>
+          <button class="alt preset" data-query="population in Carter County">Population</button>
         </div>
         <div id="searchStatus" class="status"></div>
       </section>
 
-      <section class="card span-12">
-        <h3>Search Summary</h3>
-        <p id="summaryText" class="helper">Run a search to generate a quick summary.</p>
+      <section class="panel span-12 fade-up">
+        <h3>AI Interpretation</h3>
+        <div class="intent-grid">
+          <div class="intent-block">
+            <div class="key">Metric</div>
+            <div class="val" id="intentMetric">-</div>
+          </div>
+          <div class="intent-block">
+            <div class="key">Geography</div>
+            <div class="val" id="intentGeo">-</div>
+          </div>
+          <div class="intent-block">
+            <div class="key">Time</div>
+            <div class="val" id="intentTime">-</div>
+          </div>
+        </div>
+        <p id="noteText" class="helper" style="margin-top:8px;">Run a search to see extraction notes.</p>
       </section>
 
-      <section class="card span-12">
+      <section class="panel span-12 fade-up">
+        <div class="kpis">
+          <div class="kpi"><div class="label">Rows</div><div class="value" id="kpiRows">0</div></div>
+          <div class="kpi"><div class="label">Geographies</div><div class="value" id="kpiGeo">0</div></div>
+          <div class="kpi"><div class="label">Year Range</div><div class="value" id="kpiYears">-</div></div>
+          <div class="kpi"><div class="label">Sources</div><div class="value" id="kpiSources">0</div></div>
+        </div>
+      </section>
+
+      <section class="panel span-12 fade-up">
         <h3>Results</h3>
-        <div id="resultList" class="grid" style="grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 10px;"></div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Metric</th>
+                <th>Year</th>
+                <th>Geography</th>
+                <th>Value</th>
+                <th>Unit</th>
+                <th>Source</th>
+              </tr>
+            </thead>
+            <tbody id="resultsBody"></tbody>
+          </table>
+        </div>
       </section>
     </main>
   </div>
 
-  <footer class="source-bar" aria-label="Source attribution">
-    <div id="sourceBar" class="source-bar-inner"></div>
+  <footer class="foot" aria-label="Source attribution">
+    <div id="sourceBar" class="foot-inner"></div>
   </footer>
 
   <script src="assets/chna.js"></script>
   <script>
     const els = {
-      query: document.getElementById('queryInput'),
-      state: document.getElementById('stateSelect'),
-      county: document.getElementById('countySelect'),
-      year: document.getElementById('yearInput'),
-      source: document.getElementById('sourceSelect'),
-      limit: document.getElementById('limitInput'),
+      queryInput: document.getElementById('queryInput'),
       searchBtn: document.getElementById('searchBtn'),
-      clearBtn: document.getElementById('clearBtn'),
       downloadBtn: document.getElementById('downloadBtn'),
-      focusToggle: document.getElementById('focusToggle'),
+      clearBtn: document.getElementById('clearBtn'),
       searchStatus: document.getElementById('searchStatus'),
-      summary: document.getElementById('summaryText'),
-      resultList: document.getElementById('resultList'),
+      noteText: document.getElementById('noteText'),
+      intentMetric: document.getElementById('intentMetric'),
+      intentGeo: document.getElementById('intentGeo'),
+      intentTime: document.getElementById('intentTime'),
+      kpiRows: document.getElementById('kpiRows'),
+      kpiGeo: document.getElementById('kpiGeo'),
+      kpiYears: document.getElementById('kpiYears'),
+      kpiSources: document.getElementById('kpiSources'),
+      resultsBody: document.getElementById('resultsBody'),
       sourceBar: document.getElementById('sourceBar'),
       presets: Array.from(document.querySelectorAll('.preset')),
     };
 
-    let geoOptions = { states: [], counties: [] };
-    let lastResponse = { items: [], sources: [], query: '' };
+    let lastItems = [];
 
-    function selectedStateAbbr() {
-      const selected = geoOptions.states.find((s) => s.fips === els.state.value);
-      return selected ? selected.abbr : '';
-    }
-
-    function refreshCountySelect() {
-      const focusOnly = els.focusToggle.value === 'true';
-      const counties = CHNA.fillCountySelect(els.county, geoOptions.counties, els.state.value, focusOnly);
-      const preferred = counties.find((c) => c.available) || counties[0];
-      if (preferred) els.county.value = preferred.geo_id;
-    }
-
-    async function loadSources() {
-      const sources = await CHNA.api('/sources');
-      els.source.innerHTML = '<option value="">Any source</option>';
-      for (const source of sources) {
-        const opt = document.createElement('option');
-        opt.value = source.name;
-        opt.textContent = source.name;
-        els.source.appendChild(opt);
+    function renderIntent(intent) {
+      if (!intent) {
+        els.intentMetric.textContent = '-';
+        els.intentGeo.textContent = '-';
+        els.intentTime.textContent = '-';
+        return;
+      }
+      els.intentMetric.textContent = `${intent.metric_name} (${intent.domain})`;
+      els.intentGeo.textContent = intent.geography_scope || '-';
+      if (intent.year) {
+        els.intentTime.textContent = String(intent.year);
+      } else {
+        els.intentTime.textContent = intent.is_latest ? 'Latest available' : 'No year specified';
       }
     }
 
-    function renderResults(items) {
+    function renderRows(items) {
+      lastItems = items || [];
       if (!items.length) {
-        els.resultList.innerHTML = '<div class="card span-12">No matching indicators found for this search.</div>';
+        els.resultsBody.innerHTML = '<tr><td colspan="6">No data rows returned for this query.</td></tr>';
+        els.kpiRows.textContent = '0';
+        els.kpiGeo.textContent = '0';
+        els.kpiYears.textContent = '-';
+        els.kpiSources.textContent = '0';
         return;
       }
 
-      const html = items
-        .map((item) => {
-          return `<article class="result-card" style="grid-column: span 6;">
-            <h4>${CHNA.escapeHtml(item.measure_name)} <span class="helper">(${CHNA.escapeHtml(item.measure_code)})</span></h4>
-            <div class="result-meta">
-              <span><strong>Value:</strong> ${CHNA.formatNumber(item.value)} ${CHNA.escapeHtml(item.unit)}</span>
-              <span><strong>Year:</strong> ${item.year}</span>
-              <span><strong>County:</strong> ${CHNA.escapeHtml(item.geo_name)}</span>
-              <span><strong>Source:</strong> ${CHNA.escapeHtml(item.source_name)}</span>
-              <span><strong>Match score:</strong> ${CHNA.formatNumber(item.score)}</span>
-            </div>
-          </article>`;
-        })
+      els.resultsBody.innerHTML = items
+        .map((item) => `<tr>
+          <td>${CHNA.escapeHtml(item.metric_name)}</td>
+          <td>${item.year}</td>
+          <td>${CHNA.escapeHtml(item.geo_name)} (${CHNA.escapeHtml(item.geo_id)})</td>
+          <td>${CHNA.formatNumber(item.value)}</td>
+          <td>${CHNA.escapeHtml(item.unit)}</td>
+          <td>${CHNA.escapeHtml(item.source_name)}</td>
+        </tr>`)
         .join('');
-      els.resultList.innerHTML = html;
-    }
 
-    function renderSummary(payload) {
-      const items = payload.items || [];
-      if (!items.length) {
-        els.summary.textContent = 'No signals found. Try broader terms or remove a filter.';
-        return;
-      }
-
-      const top = items[0];
-      const sourceCount = new Set(items.map((i) => i.source_name)).size;
-      els.summary.textContent = `Found ${items.length} indicator match(es) across ${sourceCount} source(s) for "${payload.query}". Top result: ${top.measure_name} in ${top.geo_name} (${top.year}).`;
+      const geoCount = new Set(items.map((item) => item.geo_id)).size;
+      const sourceCount = new Set(items.map((item) => item.source_name)).size;
+      const years = items.map((item) => item.year);
+      const minYear = Math.min(...years);
+      const maxYear = Math.max(...years);
+      els.kpiRows.textContent = String(items.length);
+      els.kpiGeo.textContent = String(geoCount);
+      els.kpiYears.textContent = minYear === maxYear ? String(minYear) : `${minYear} - ${maxYear}`;
+      els.kpiSources.textContent = String(sourceCount);
     }
 
     async function runSearch() {
+      const query = (els.queryInput.value || '').trim();
+      if (query.length < 2) {
+        CHNA.setStatus(els.searchStatus, 'Enter at least 2 characters.', 'bad');
+        return;
+      }
+
       try {
-        const q = (els.query.value || '').trim();
-        if (q.length < 2) {
-          CHNA.setStatus(els.searchStatus, 'Please enter at least 2 characters.', 'bad');
-          return;
-        }
-
-        const params = new URLSearchParams();
-        params.set('q', q);
-        params.set('state_fips', els.state.value);
-        if (els.county.value) params.set('county_geo_id', els.county.value);
-        if (els.year.value) params.set('year', els.year.value);
-        if (els.source.value) params.set('source_name', els.source.value);
-        if (els.limit.value) params.set('limit', els.limit.value);
-
-        const payload = await CHNA.api(`/search?${params.toString()}`);
-        lastResponse = payload;
-        renderResults(payload.items || []);
-        renderSummary(payload);
+        const params = new URLSearchParams({ q: query, limit: '1000' });
+        const payload = await CHNA.api(`/research/search?${params.toString()}`);
+        renderIntent(payload.intent || null);
+        renderRows(payload.items || []);
+        els.noteText.textContent = payload.note || '';
         CHNA.renderSourceBar(els.sourceBar, payload.sources || []);
-        CHNA.setStatus(els.searchStatus, `Search complete. ${payload.total_results} result(s).`, 'good');
+        CHNA.setStatus(els.searchStatus, `Search complete: ${payload.total_results} row(s).`, 'good');
       } catch (err) {
         CHNA.setStatus(els.searchStatus, `Search failed: ${err.message}`, 'bad');
       }
     }
 
-    function clearSearch() {
-      els.query.value = '';
-      els.year.value = '';
-      els.source.value = '';
-      els.limit.value = '25';
-      els.resultList.innerHTML = '';
-      els.summary.textContent = 'Run a search to generate a quick summary.';
+    function clearAll() {
+      els.queryInput.value = '';
+      renderIntent(null);
+      renderRows([]);
+      els.noteText.textContent = 'Run a search to see extraction notes.';
       CHNA.renderSourceBar(els.sourceBar, []);
       CHNA.setStatus(els.searchStatus, '', null);
-      lastResponse = { items: [], sources: [], query: '' };
     }
 
-    function downloadSearchCsv() {
-      const items = lastResponse.items || [];
-      if (!items.length) {
-        CHNA.setStatus(els.searchStatus, 'No search results to download.', 'bad');
+    function downloadCsv() {
+      if (!lastItems.length) {
+        CHNA.setStatus(els.searchStatus, 'No results to export.', 'bad');
         return;
       }
-      const headers = ['source_name', 'measure_code', 'measure_name', 'year', 'geo_id', 'geo_name', 'value', 'unit', 'score'];
-      const rows = items.map((item) => headers.map((h) => item[h]));
-      CHNA.downloadCsv(`chna-search-${new Date().toISOString().slice(0, 10)}.csv`, headers, rows);
-      CHNA.setStatus(els.searchStatus, `Downloaded ${items.length} search result(s).`, 'good');
+      const headers = ['metric_key', 'metric_name', 'year', 'geo_id', 'geo_name', 'value', 'unit', 'source_name', 'source_url', 'retrieved_at'];
+      const rows = lastItems.map((item) => headers.map((h) => item[h]));
+      CHNA.downloadCsv(`chna-live-search-${new Date().toISOString().slice(0, 10)}.csv`, headers, rows);
+      CHNA.setStatus(els.searchStatus, `CSV downloaded (${lastItems.length} rows).`, 'good');
     }
 
-    async function init() {
-      geoOptions = await CHNA.loadGeographyOptions();
-      CHNA.fillStateSelect(els.state, geoOptions.states);
-      els.state.value = '47';
-      refreshCountySelect();
-      await loadSources();
+    function init() {
       CHNA.renderSourceBar(els.sourceBar, []);
-
-      els.state.addEventListener('change', refreshCountySelect);
-      els.focusToggle.addEventListener('change', refreshCountySelect);
+      els.queryInput.value = 'latest per capita income data in NE TN';
       els.searchBtn.addEventListener('click', runSearch);
-      els.clearBtn.addEventListener('click', clearSearch);
-      els.downloadBtn.addEventListener('click', downloadSearchCsv);
-      els.query.addEventListener('keydown', (event) => {
-        if (event.key === 'Enter') {
+      els.downloadBtn.addEventListener('click', downloadCsv);
+      els.clearBtn.addEventListener('click', clearAll);
+      els.queryInput.addEventListener('keydown', (event) => {
+        if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
           event.preventDefault();
           runSearch();
         }
       });
       for (const button of els.presets) {
         button.addEventListener('click', () => {
-          els.query.value = button.dataset.q || '';
+          els.queryInput.value = button.dataset.query || '';
           runSearch();
         });
       }
     }
 
-    init().catch((err) => {
-      CHNA.setStatus(els.searchStatus, `Initialization failed: ${err.message}`, 'bad');
-    });
+    init();
   </script>
 </body>
 </html>

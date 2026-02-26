@@ -3,7 +3,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from .api import connectors, geography, metrics, runs, search, sources
+from .api import connectors, geography, metrics, research, runs, sources
 from .db import Base, engine
 
 Base.metadata.create_all(bind=engine)
@@ -33,4 +33,4 @@ app.include_router(runs.router)
 app.include_router(connectors.router)
 app.include_router(metrics.router)
 app.include_router(geography.router)
-app.include_router(search.router)
+app.include_router(research.router)
