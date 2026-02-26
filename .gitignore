@@ -22,6 +22,9 @@ Thumbs.db
 
 # Data outputs
 artifacts/
+*.db
+.pytest_cache/
+backend/pytest-cache-files-*/
 
 # Docker
 *.pid
