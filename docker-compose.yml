@@ -1,0 +1,37 @@
+﻿services:
+  db:
+    image: postgres:16.4
+    container_name: chna-db
+    environment:
+      POSTGRES_DB: chna
+      POSTGRES_USER: chna
+      POSTGRES_PASSWORD: chna
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: ./backend
+    container_name: chna-backend
+    environment:
+      DATABASE_URL: postgresql+psycopg://chna:chna@db:5432/chna
+      APP_ENV: dev
+    depends_on:
+      - db
+    ports:
+      - "8000:8000"
+
+  frontend:
+    image: nginx:1.27-alpine
+    container_name: chna-frontend
+    depends_on:
+      - backend
+    ports:
+      - "8080:80"
+    volumes:
+      - ./frontend:/usr/share/nginx/html:ro
+
+volumes:
+  pgdata:

@@ -1,0 +1,23 @@
+﻿{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CHNA Source Contract",
+  "type": "object",
+  "required": [
+    "name",
+    "url",
+    "category",
+    "geography_level",
+    "update_frequency",
+    "owner",
+    "citation"
+  ],
+  "properties": {
+    "name": { "type": "string", "minLength": 2 },
+    "url": { "type": "string", "format": "uri" },
+    "category": { "type": "string" },
+    "geography_level": { "type": "string" },
+    "update_frequency": { "type": "string" },
+    "owner": { "type": "string" },
+    "citation": { "type": "string" }
+  }
+}

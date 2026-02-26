@@ -1,0 +1,75 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CHNA Data Hub</title>
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --card: #ffffff;
+      --ink: #0f172a;
+      --muted: #475569;
+      --accent: #0f766e;
+    }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: radial-gradient(circle at top right, #dbeafe, var(--bg));
+      color: var(--ink);
+    }
+    .wrap {
+      max-width: 920px;
+      margin: 40px auto;
+      padding: 0 16px;
+    }
+    .card {
+      background: var(--card);
+      border-radius: 14px;
+      padding: 20px;
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+      margin-bottom: 18px;
+    }
+    h1 { margin-top: 0; }
+    p { color: var(--muted); }
+    button {
+      background: var(--accent);
+      color: #fff;
+      border: 0;
+      border-radius: 10px;
+      padding: 10px 14px;
+      cursor: pointer;
+    }
+    pre {
+      background: #0b1020;
+      color: #e2e8f0;
+      border-radius: 10px;
+      padding: 12px;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>CHNA Data Hub</h1>
+      <p>Starter workspace for source registry and ingestion tracking.</p>
+      <button id="healthBtn">Check API Health</button>
+      <pre id="out">Click the button to test backend connectivity.</pre>
+    </div>
+  </div>
+  <script>
+    const btn = document.getElementById('healthBtn');
+    const out = document.getElementById('out');
+    btn.addEventListener('click', async () => {
+      try {
+        const res = await fetch('http://localhost:8000/health');
+        const data = await res.json();
+        out.textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        out.textContent = 'Backend not reachable at http://localhost:8000/health';
+      }
+    });
+  </script>
+</body>
+</html>
