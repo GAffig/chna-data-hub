@@ -52,6 +52,20 @@ class CensusPullResponse(BaseModel):
     records_loaded: int
 
 
+class PlacesPullRequest(BaseModel):
+    year: int = Field(default=2025, ge=2020)
+    state_abbr: str = Field(default="TN", min_length=2, max_length=2)
+    replace_existing: bool = True
+
+
+class PlacesPullResponse(BaseModel):
+    run_id: int
+    source_name: str
+    year: int
+    state_abbr: str
+    records_loaded: int
+
+
 class CommunityMetricRead(BaseModel):
     id: int
     source_name: str

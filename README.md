@@ -46,6 +46,7 @@ Serve files in `frontend/` with any static server.
 - `GET /runs`
 - `POST /runs`
 - `POST /connectors/census-acs/pull`
+- `POST /connectors/cdc-places/pull`
 - `GET /metrics`
 
 ## MVP Workflow
@@ -62,12 +63,19 @@ curl -X POST http://localhost:8000/connectors/census-acs/pull \
   -d '{"year": 2024, "state_fips": "47", "replace_existing": true}'
 ```
 
-3. Query standardized metric records:
+3. Pull CDC PLACES county measures:
 ```bash
-curl "http://localhost:8000/metrics?year=2024&source_name=US%20Census%20ACS"
+curl -X POST http://localhost:8000/connectors/cdc-places/pull \
+  -H "Content-Type: application/json" \
+  -d '{"year": 2025, "state_abbr": "TN", "replace_existing": true}'
 ```
 
-Optionally set `CENSUS_API_KEY` in your environment before pulling.
+4. Query standardized metric records:
+```bash
+curl "http://localhost:8000/metrics?year=2025&source_name=CDC%20PLACES"
+```
+
+Optionally set `CENSUS_API_KEY` in your environment before pulling Census data.
 
 ## Why this setup avoids dependency drift
 
