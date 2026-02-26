@@ -1,12 +1,12 @@
 ﻿from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from .api import runs, sources
+from .api import connectors, metrics, runs, sources
 from .db import Base, engine
 
 Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="CHNA Data Hub API", version="0.1.0")
+app = FastAPI(title="CHNA Data Hub API", version="0.2.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -24,3 +24,5 @@ def health():
 
 app.include_router(sources.router)
 app.include_router(runs.router)
+app.include_router(connectors.router)
+app.include_router(metrics.router)

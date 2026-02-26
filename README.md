@@ -37,13 +37,37 @@ uvicorn app.main:app --reload
 
 Serve files in `frontend/` with any static server.
 
-## Initial Endpoints
+## Current Endpoints
 
 - `GET /health`
 - `GET /sources`
 - `POST /sources`
+- `POST /sources/seed` (loads CHNA references from your BRMC reference list)
 - `GET /runs`
 - `POST /runs`
+- `POST /connectors/census-acs/pull`
+- `GET /metrics`
+
+## MVP Workflow
+
+1. Seed approved reference sources:
+```bash
+curl -X POST http://localhost:8000/sources/seed
+```
+
+2. Pull Census ACS county population (TN by default):
+```bash
+curl -X POST http://localhost:8000/connectors/census-acs/pull \
+  -H "Content-Type: application/json" \
+  -d '{"year": 2024, "state_fips": "47", "replace_existing": true}'
+```
+
+3. Query standardized metric records:
+```bash
+curl "http://localhost:8000/metrics?year=2024&source_name=US%20Census%20ACS"
+```
+
+Optionally set `CENSUS_API_KEY` in your environment before pulling.
 
 ## Why this setup avoids dependency drift
 

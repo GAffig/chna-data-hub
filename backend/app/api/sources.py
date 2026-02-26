@@ -3,7 +3,8 @@ from sqlalchemy.orm import Session
 
 from ..db import get_db
 from ..models import Source
-from ..schemas import SourceCreate, SourceRead
+from ..schemas import SeedResponse, SourceCreate, SourceRead
+from ..services.seed import seed_reference_sources
 
 router = APIRouter(prefix="/sources", tags=["sources"])
 
@@ -20,3 +21,9 @@ def create_source(payload: SourceCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(source)
     return source
+
+
+@router.post("/seed", response_model=SeedResponse)
+def seed_sources(db: Session = Depends(get_db)):
+    inserted, skipped = seed_reference_sources(db)
+    return SeedResponse(inserted=inserted, skipped=skipped)

@@ -31,3 +31,37 @@ class RunRead(RunCreate):
     pulled_at: datetime
 
     model_config = {"from_attributes": True}
+
+
+class SeedResponse(BaseModel):
+    inserted: int
+    skipped: int
+
+
+class CensusPullRequest(BaseModel):
+    year: int = Field(default=2024, ge=2009)
+    state_fips: str = Field(default="47", min_length=2, max_length=2)
+    replace_existing: bool = True
+
+
+class CensusPullResponse(BaseModel):
+    run_id: int
+    source_name: str
+    year: int
+    state_fips: str
+    records_loaded: int
+
+
+class CommunityMetricRead(BaseModel):
+    id: int
+    source_name: str
+    measure_code: str
+    measure_name: str
+    unit: str
+    year: int
+    geo_id: str
+    geo_name: str
+    value: float
+    pulled_at: datetime
+
+    model_config = {"from_attributes": True}
