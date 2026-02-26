@@ -35,7 +35,12 @@ uvicorn app.main:app --reload
 
 ### Frontend
 
-Serve files in `frontend/` with any static server.
+```bash
+cd frontend
+python -m http.server 8080
+```
+
+Open `http://localhost:8080`.
 
 ## Current Endpoints
 
@@ -48,6 +53,13 @@ Serve files in `frontend/` with any static server.
 - `POST /connectors/census-acs/pull`
 - `POST /connectors/cdc-places/pull`
 - `GET /metrics`
+
+`GET /metrics` supports filters:
+- `year`
+- `source_name`
+- `measure_code`
+- `geo_prefix`
+- `limit` (1 to 5000, default 500)
 
 ## MVP Workflow
 
@@ -76,6 +88,23 @@ curl "http://localhost:8000/metrics?year=2025&source_name=CDC%20PLACES"
 ```
 
 Optionally set `CENSUS_API_KEY` in your environment before pulling Census data.
+Set `APP_CORS_ORIGINS` if you want to restrict browser access (default is `*` for easy testing).
+
+## Share With A Colleague (Quick Test)
+
+1. Clone the repo.
+2. Start backend:
+```bash
+cd backend
+python -m pip install -r requirements.txt
+python -m uvicorn app.main:app --host 0.0.0.0 --port 8000
+```
+3. Start frontend in a second terminal:
+```bash
+cd frontend
+python -m http.server 8080
+```
+4. Open `http://localhost:8080` and set API Base URL to `http://<host-ip>:8000` if testing from another device on the same network.
 
 ## Why this setup avoids dependency drift
 
