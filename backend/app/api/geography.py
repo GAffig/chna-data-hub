@@ -14,24 +14,29 @@ STATE_MAP = {
 }
 
 FOCUS_REGION_COUNTIES = [
-    {"geo_id": "47019", "name": "Carter County", "state_fips": "47"},
     {"geo_id": "47059", "name": "Greene County", "state_fips": "47"},
+    {"geo_id": "47163", "name": "Sullivan County", "state_fips": "47"},
+    {"geo_id": "47019", "name": "Carter County", "state_fips": "47"},
+    {"geo_id": "47179", "name": "Washington County", "state_fips": "47"},
+    {"geo_id": "47091", "name": "Johnson County", "state_fips": "47"},
     {"geo_id": "47067", "name": "Hancock County", "state_fips": "47"},
     {"geo_id": "47073", "name": "Hawkins County", "state_fips": "47"},
-    {"geo_id": "47091", "name": "Johnson County", "state_fips": "47"},
-    {"geo_id": "47163", "name": "Sullivan County", "state_fips": "47"},
     {"geo_id": "47171", "name": "Unicoi County", "state_fips": "47"},
-    {"geo_id": "47179", "name": "Washington County", "state_fips": "47"},
-    {"geo_id": "51027", "name": "Buchanan County", "state_fips": "51"},
+    {"geo_id": "47063", "name": "Hamblen County", "state_fips": "47"},
+    {"geo_id": "47029", "name": "Cocke County", "state_fips": "47"},
+    {"geo_id": "51191", "name": "Washington County", "state_fips": "51"},
+    {"geo_id": "51520", "name": "Bristol City", "state_fips": "51"},
+    {"geo_id": "51167", "name": "Russell County", "state_fips": "51"},
+    {"geo_id": "51173", "name": "Smyth County", "state_fips": "51"},
+    {"geo_id": "51195", "name": "Wise County", "state_fips": "51"},
+    {"geo_id": "51105", "name": "Lee County", "state_fips": "51"},
+    {"geo_id": "51720", "name": "Norton City", "state_fips": "51"},
+    {"geo_id": "51169", "name": "Scott County", "state_fips": "51"},
     {"geo_id": "51051", "name": "Dickenson County", "state_fips": "51"},
     {"geo_id": "51077", "name": "Grayson County", "state_fips": "51"},
-    {"geo_id": "51105", "name": "Lee County", "state_fips": "51"},
-    {"geo_id": "51167", "name": "Russell County", "state_fips": "51"},
-    {"geo_id": "51169", "name": "Scott County", "state_fips": "51"},
-    {"geo_id": "51173", "name": "Smyth County", "state_fips": "51"},
+    {"geo_id": "51027", "name": "Buchanan County", "state_fips": "51"},
     {"geo_id": "51185", "name": "Tazewell County", "state_fips": "51"},
-    {"geo_id": "51191", "name": "Washington County", "state_fips": "51"},
-    {"geo_id": "51195", "name": "Wise County", "state_fips": "51"},
+    {"geo_id": "51197", "name": "Wythe County", "state_fips": "51"},
 ]
 
 
@@ -47,7 +52,7 @@ def geography_options(db: Session = Depends(get_db)):
     available = {}
     for row in rows:
         geo_id = str(row[0])
-        if len(geo_id) >= 5 and geo_id[:2] in STATE_MAP:
+        if len(geo_id) >= 5:
             available[geo_id[:5]] = str(row[1])
 
     focus_ids = {item["geo_id"] for item in FOCUS_REGION_COUNTIES}
@@ -70,9 +75,7 @@ def geography_options(db: Session = Depends(get_db)):
         if geo_id in focus_ids:
             continue
         state_fips = geo_id[:2]
-        state = STATE_MAP.get(state_fips)
-        if not state:
-            continue
+        state = STATE_MAP.get(state_fips, {"abbr": state_fips, "name": f"State {state_fips}"})
         counties.append(
             GeographyCounty(
                 geo_id=geo_id,
@@ -85,9 +88,13 @@ def geography_options(db: Session = Depends(get_db)):
         )
 
     counties.sort(key=lambda c: (not c.focus_region, c.state_abbr, c.name))
-    states = [
-        GeographyState(name=meta["name"], abbr=meta["abbr"], fips=fips)
-        for fips, meta in STATE_MAP.items()
-    ]
+    state_fips_in_data = {geo_id[:2] for geo_id in available.keys()}
+    focus_state_fips = {item["state_fips"] for item in FOCUS_REGION_COUNTIES}
+    all_state_fips = sorted(state_fips_in_data.union(focus_state_fips))
+
+    states = []
+    for fips in all_state_fips:
+        meta = STATE_MAP.get(fips, {"abbr": fips, "name": f"State {fips}"})
+        states.append(GeographyState(name=meta["name"], abbr=meta["abbr"], fips=fips))
 
     return GeographyOptionsResponse(states=states, counties=counties)
